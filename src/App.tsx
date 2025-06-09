@@ -1,15 +1,17 @@
 import "./App.css";
 import { FC, ReactElement, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import { HashRouter as Router, Routes, Route } from "react-router";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import { selectUser } from "./containers/auth/selectors";
-import ToggleColorMode from "./components/ui/ToggleColorMode.component";
+import Header from "./components/header/Header.component";
+import DisplayTracks from "./components/tracks/DisplayTracks.component";
+import HomePage from "./components/home/HomePage";
 
 const App: FC = (): ReactElement => {
-  const dispatch = useDispatch();
   const user = useSelector(selectUser);
   // TODO: You can access user data and now fetch user's playlists
   console.log(user);
@@ -23,7 +25,13 @@ const App: FC = (): ReactElement => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ToggleColorMode mode={mode} setMode={toggleMode} />
+      <Router>
+        <Header mode={mode} setMode={toggleMode} />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/search/tracks" element={<DisplayTracks />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 };
