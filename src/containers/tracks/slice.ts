@@ -8,6 +8,7 @@ export interface ITrack {
   album: string;
   albumImage: string;
   spotifyUrl: string;
+  albumReleaseDate: string;
 }
 export interface IRandomPlaylist {
   id: string;

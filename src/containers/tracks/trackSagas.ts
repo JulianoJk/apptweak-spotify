@@ -31,6 +31,7 @@ function* fetchTracksWorker(action: PayloadAction<string>): SagaIterator {
         artist: track.artists[0]?.name,
         album: track.album.name,
         albumImage: track.album.images[0]?.url,
+        albumReleaseDate: track.album.release_date,
         spotifyUrl: track.external_urls.spotify
       })
     );

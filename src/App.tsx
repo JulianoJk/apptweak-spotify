@@ -8,8 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import { selectUser } from "./containers/auth/selectors";
 import Header from "./components/header/Header.component";
-import DisplayTracks from "./components/tracks/DisplayTracks.component";
-import HomePage from "./components/home/HomePage";
+import TrackList from "./components/tracks/TrackList.component";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
@@ -28,8 +27,8 @@ const App: FC = (): ReactElement => {
       <Router>
         <Header mode={mode} setMode={toggleMode} />
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/search/tracks" element={<DisplayTracks />} />
+          <Route path="/" element={<h1>Home route</h1>} />
+          <Route path="/search/tracks" element={<TrackList />} />
         </Routes>
       </Router>
     </ThemeProvider>

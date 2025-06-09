@@ -8,6 +8,8 @@ import ToggleColorMode from "../ui/ToggleColorMode.component";
 import { useDispatch } from "react-redux";
 import { fetchTracks } from "../../containers/tracks/slice";
 import { Button } from "@mui/material";
+import { useStyles } from "./Header.styles";
+import { useNavigate } from "react-router";
 
 interface HeaderProps {
   mode: "light" | "dark";
@@ -17,26 +19,39 @@ interface HeaderProps {
 export default function Header(props: HeaderProps) {
   const [searchValue, setSearchValue] = useState<string>("");
   const dispatch = useDispatch();
-
+  const { classes } = useStyles();
+  const navigate = useNavigate();
+  const searchTracks = () => {
+    dispatch(fetchTracks(searchValue));
+    navigate("/search/tracks");
+  };
   return (
-    <AppBar position="static" color="default" elevation={1}>
+    <AppBar position="static" elevation={1} className={classes.appBar}>
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" noWrap sx={{ flexShrink: 0 }}>
+        <Typography variant="h6" className={classes.title}>
           Spotify Clone
         </Typography>
 
-        <Box sx={{ flexGrow: 1, mx: 4 }}>
+        <Box className={classes.searchSection}>
           <TextField
             id="standard-basic"
             label="Search for a track"
-            variant="standard"
+            className={classes.textField}
+            slotProps={{
+              input: {
+                style: {
+                  borderRadius: "3em"
+                }
+              }
+            }}
             onChange={(event) => setSearchValue(event.target.value)}
-            sx={{ borderRadius: 1, width: "100%" }}
           />
-          <Button onClick={() => dispatch(fetchTracks(searchValue))}>Search</Button>
+          <Button variant="outlined" className={classes.searchButton} onClick={searchTracks}>
+            Search
+          </Button>
         </Box>
 
-        <Box sx={{ flexShrink: 0 }}>
+        <Box className={classes.toggleBox}>
           <ToggleColorMode {...props} />
         </Box>
       </Toolbar>
