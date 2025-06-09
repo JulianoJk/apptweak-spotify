@@ -1,35 +1,37 @@
 import "./App.css";
+import { FC, ReactElement, useState } from "react";
+import { useSelector } from "react-redux";
+import { HashRouter as Router, Routes, Route } from "react-router";
 
-import { FC, ReactElement } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import { selectUser } from "./containers/auth/selectors";
-import logo from "./logo.svg";
+import Header from "./components/header/Header.component";
+import TrackList from "./components/tracks/TrackList.component";
 
 const App: FC = (): ReactElement => {
-  const dispatch = useDispatch();
   const user = useSelector(selectUser);
-
   // TODO: You can access user data and now fetch user's playlists
   console.log(user);
 
+  const [mode, setMode] = useState<"light" | "dark">("dark");
+
+  const toggleMode = () => setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+
+  const theme = createTheme({ palette: { mode } });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Header mode={mode} setMode={toggleMode} />
+        <Routes>
+          <Route path="/" element={<h1>Home route</h1>} />
+          <Route path="/search/tracks" element={<TrackList />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 };
 
