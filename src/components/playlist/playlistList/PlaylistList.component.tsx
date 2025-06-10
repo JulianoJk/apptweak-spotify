@@ -5,7 +5,7 @@ import { IUserPlaylist } from "../../../containers/playlist/slice";
 import { useStyles } from "./PlaylistList.styles";
 import { RootState } from "../../../store/store";
 
-const PlaylistGrid = () => {
+const PlaylistList = () => {
   const { playlists } = useSelector((state: RootState) => state.playlistSlice);
   const { classes } = useStyles();
 
@@ -44,4 +44,4 @@ const PlaylistGrid = () => {
   );
 };
 
-export default PlaylistGrid;
+export default PlaylistList;

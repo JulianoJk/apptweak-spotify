@@ -9,7 +9,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { selectUser } from "./containers/auth/selectors";
 import Header from "./components/header/Header.component";
 import TrackList from "./components/tracks/TrackList.component";
-import PlaylistModal from "./components/playlist/playlistModal/PlaylistModal.component";
+import PlaylistList from "./components/playlist/playlistList/PlaylistList.component";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
@@ -28,10 +28,8 @@ const App: FC = (): ReactElement => {
       <Router>
         <Header mode={mode} setMode={toggleMode} />
         <Routes>
-          <Route path="/" element={<h1>Home route</h1>} />
+          <Route path="/" element={<PlaylistList />} />
           <Route path="/search/tracks" element={<TrackList />} />
-          <Route path="/playlists" element={<PlaylistModal />} />
-
           <Route path="/*" element={<h1>test route</h1>} />
         </Routes>
       </Router>
