@@ -6,10 +6,17 @@ import { Card, CardContent, Box, Typography } from "@mui/material";
 import { ITrack } from "../../containers/tracks/slice";
 import { RootState } from "../../store/store";
 import { useStyles } from "./TrackList.styles";
+import { RequestStatus } from "../../types/requests";
+import ErrorMessage from "../ui/ErrorMessage.component";
+import LoadingIndicator from "../ui/LoadingIndicator.component";
 
 const TrackList = () => {
-  const tracks = useSelector((state: RootState) => state.spotifyTracks.tracks);
   const { classes } = useStyles();
+  const { tracks, status, error } = useSelector((state: RootState) => state.spotifyTracks);
+
+  if (status === RequestStatus.PENDING) return <LoadingIndicator />;
+  if (status === RequestStatus.ERROR)
+    return <ErrorMessage message={error || "Something went wrong"} />;
 
   return (
     <List className={classes.listRoot}>

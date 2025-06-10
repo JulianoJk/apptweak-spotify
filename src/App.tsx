@@ -29,6 +29,7 @@ const App: FC = (): ReactElement => {
         <Header mode={mode} setMode={toggleMode} />
         <Routes>
           <Route path="/" element={<PlaylistList />} />
+          <Route path="/playlists" element={<PlaylistList />} />
           <Route path="/search/tracks" element={<TrackList />} />
           <Route path="/*" element={<h1>test route</h1>} />
         </Routes>

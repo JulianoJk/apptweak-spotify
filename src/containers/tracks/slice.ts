@@ -20,24 +20,19 @@ export interface IRandomPlaylist {
 
 interface TracksState {
   tracks: ITrack[];
-  randomPlaylists?: IRandomPlaylist[];
   status: RequestStatus;
   error?: string;
 }
 
 const initialState: TracksState = {
   tracks: [],
-  randomPlaylists: [],
   status: RequestStatus.IDLE
 };
 
 export const fetchTracks = createAction<string>("spotify/fetchTracks");
 export const getTracksError = createAction<ErrorPayload>("spotify/setTracksError");
 export const getTrackSuccess = createAction<ITrack[]>("spotify/setTrackSuccess");
-export const fetchHomePlaylists = createAction("spotify/fetchHomePlaylists");
-export const getHomePlaylistsSuccess = createAction<IRandomPlaylist[]>(
-  "spotify/setHomePlaylistsSuccess"
-);
+
 export const getHomePlaylistsError = createAction<ErrorPayload>("spotify/setHomePlaylistsError");
 
 const tracksSlice = createSlice({
@@ -57,14 +52,7 @@ const tracksSlice = createSlice({
         state.status = RequestStatus.SUCCESS;
         state.tracks = action.payload;
       })
-      .addCase(fetchHomePlaylists, (state) => {
-        state.status = RequestStatus.PENDING;
-      })
-      .addCase(getHomePlaylistsSuccess, (state, action) => {
-        state.status = RequestStatus.SUCCESS;
-        state.randomPlaylists = action.payload;
-      })
-      .addCase(getHomePlaylistsError, (state, action) => {
+      .addCase(getTracksError, (state, action) => {
         state.status = RequestStatus.ERROR;
         state.error = action.payload.message;
       });

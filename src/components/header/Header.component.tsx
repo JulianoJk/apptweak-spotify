@@ -10,6 +10,7 @@ import { Button } from "@mui/material";
 import { useStyles } from "./Header.styles";
 import { openCreateModal } from "../../containers/playlist/slice";
 import PlaylistModal from "../playlist/playlistModal/PlaylistModal.component";
+import { useNavigate } from "react-router";
 
 interface HeaderProps {
   mode: "light" | "dark";
@@ -18,11 +19,13 @@ interface HeaderProps {
 
 export default function Header(props: HeaderProps) {
   const [searchValue, setSearchValue] = useState<string>("");
-  const dispatch = useDispatch();
   const { classes } = useStyles();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const searchTracks = () => {
     dispatch(fetchTracks(searchValue));
+    navigate("/search/tracks");
   };
   const createPlaylist = () => {
     dispatch(openCreateModal());

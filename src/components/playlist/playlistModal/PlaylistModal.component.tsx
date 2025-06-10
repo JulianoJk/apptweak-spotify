@@ -8,19 +8,23 @@ import { closeCreateModal, createPlaylist } from "../../../containers/playlist/s
 import { RootState } from "../../../store/store";
 import { useStyles } from "./PlaylistModal.styles";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 const PlaylistModal = () => {
-  const dispatch = useDispatch();
   const { classes } = useStyles();
   const { isModalOpen } = useSelector((state: RootState) => state.playlistSlice);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const handleCreate = () => {
     if (name.trim()) {
       dispatch(createPlaylist({ name, description }));
       dispatch(closeCreateModal());
+      navigate("/playlists");
     }
   };
 
