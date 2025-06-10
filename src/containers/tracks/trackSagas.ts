@@ -1,9 +1,10 @@
-import { call, put, takeEvery, select } from "redux-saga/effects";
+import { call, put, takeEvery, select, takeLatest } from "redux-saga/effects";
 import axios from "axios";
 import { SagaIterator } from "redux-saga";
 import { fetchTracks, getTracksError, getTrackSuccess, ITrack } from "./slice";
 import { selectAccessToken } from "../auth/selectors";
 import { PayloadAction } from "@reduxjs/toolkit";
+import { getRandomPlaylists } from "../playlist/slice";
 
 function* fetchTracksWorker(action: PayloadAction<string>): SagaIterator {
   try {
@@ -35,13 +36,32 @@ function* fetchTracksWorker(action: PayloadAction<string>): SagaIterator {
         spotifyUrl: track.external_urls.spotify
       })
     );
+    fetchRandomWorker();
 
     yield put(getTrackSuccess(tracks));
   } catch (error: any) {
     yield put(getTracksError({ message: error.message }));
   }
 }
+function* fetchRandomWorker(): SagaIterator {
+  try {
+    const token = yield select(selectAccessToken);
 
-export default function* tracksSaga() {
+    const response = yield call(() =>
+      axios.get("https://api.spotify.com/v1/playlists/3cEYpjA9oz9GiPac4AsH4n", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    );
+
+    console.log("response", response.data);
+  } catch (error: any) {
+    yield put(getTracksError({ message: error.message }));
+  }
+}
+
+export default function* playListSaga() {
   yield takeEvery(fetchTracks.type, fetchTracksWorker);
+  yield takeLatest(getRandomPlaylists.type, fetchRandomWorker);
 }

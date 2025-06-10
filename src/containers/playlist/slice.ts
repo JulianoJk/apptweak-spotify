@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ITrack } from "../tracks/slice";
+import { ErrorPayload, RequestStatus } from "../../types/requests";
 
 export interface IUserPlaylist {
   id: string;
@@ -7,18 +8,37 @@ export interface IUserPlaylist {
   description?: string;
   tracks: ITrack[];
 }
-
+export interface IRandomPlaylist {
+  id: string;
+  name: string;
+  image: string;
+  description?: string;
+  spotifyUrl: string;
+  tracks: ITrack[];
+}
 interface PlaylistState {
   playlists: IUserPlaylist[];
+  randomPlaylists: IRandomPlaylist[];
   selectedPlaylistId?: string;
   isModalOpen: boolean;
+  status: RequestStatus;
+  error?: string;
 }
 
 const initialState: PlaylistState = {
   playlists: [],
+  randomPlaylists: [],
   selectedPlaylistId: undefined,
-  isModalOpen: false
+  isModalOpen: false,
+  status: RequestStatus.IDLE
 };
+export const getRandomPlaylists = createAction("spotify/fetchRandomPlaylists");
+export const getRandomPlaylistsSuccess = createAction<IRandomPlaylist[]>(
+  "spotify/fetchRandomPlaylistsSuccess"
+);
+export const getRandomPlaylistsError = createAction<ErrorPayload>(
+  "spotify/fetchRandomPlaylistsError"
+);
 
 const playlistSlice = createSlice({
   name: "userPlaylists",
@@ -65,6 +85,20 @@ const playlistSlice = createSlice({
     closeCreateModal(state) {
       state.isModalOpen = false;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getRandomPlaylists, (state) => {
+        state.status = RequestStatus.PENDING;
+      })
+      .addCase(getRandomPlaylistsSuccess, (state, action) => {
+        state.status = RequestStatus.SUCCESS;
+        state.randomPlaylists = action.payload;
+      })
+      .addCase(getRandomPlaylistsError, (state, action) => {
+        state.status = RequestStatus.ERROR;
+        state.error = action.payload.message;
+      });
   }
 });
 

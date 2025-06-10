@@ -6,10 +6,8 @@ import { useStyles } from "./PlaylistList.styles";
 import { RootState } from "../../../store/store";
 
 const PlaylistList = () => {
-  // const { playlists } = useSelector((state: RootState) => state.playlistSlice);
+  const { playlists } = useSelector((state: RootState) => state.playlistSlice);
   const { classes } = useStyles();
-  // TODO!: Change back to playlists when you implement the feature
-  const { randomPlaylists } = useSelector((state: RootState) => state.playlistSlice);
 
   return (
     <div className={classes.root}>
@@ -17,13 +15,13 @@ const PlaylistList = () => {
         Your Playlists
       </Typography>
       <Box className={classes.playlistContainer}>
-        {randomPlaylists.map((playlist: IUserPlaylist) => (
+        {playlists.map((playlist: IUserPlaylist) => (
           <Box key={playlist.id} className={classes.playlistItem}>
             <Card className={classes.card}>
               <CardMedia
                 component="img"
                 height="280"
-                image="https://via.assets.so/album.png?id=1&q=95&w=360&h=360&fit=fill"
+                image={playlist.tracks[0]?.albumImage}
                 alt={playlist.name}
                 className={classes.cardMedia}
               />

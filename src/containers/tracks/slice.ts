@@ -10,13 +10,6 @@ export interface ITrack {
   spotifyUrl: string;
   albumReleaseDate: string;
 }
-export interface IRandomPlaylist {
-  id: string;
-  name: string;
-  image: string;
-  description?: string;
-  spotifyUrl: string;
-}
 
 interface TracksState {
   tracks: ITrack[];

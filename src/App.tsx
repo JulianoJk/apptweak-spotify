@@ -10,6 +10,7 @@ import { selectUser } from "./containers/auth/selectors";
 import Header from "./components/header/Header.component";
 import TrackList from "./components/tracks/TrackList.component";
 import PlaylistList from "./components/playlist/playlistList/PlaylistList.component";
+import HomePage from "./components/pages/home/HomePage.component";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
@@ -28,8 +29,9 @@ const App: FC = (): ReactElement => {
       <Router>
         <Header mode={mode} setMode={toggleMode} />
         <Routes>
-          <Route path="/" element={<PlaylistList />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/playlists" element={<PlaylistList />} />
+          <Route path="/playlist/:id" element={<PlaylistList />} />
           <Route path="/search/tracks" element={<TrackList />} />
           <Route path="/*" element={<h1>test route</h1>} />
         </Routes>

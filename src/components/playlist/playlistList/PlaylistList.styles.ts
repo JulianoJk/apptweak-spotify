@@ -2,35 +2,44 @@ import { makeStyles } from "tss-react/mui";
 
 export const useStyles = makeStyles()((theme) => ({
   root: {
-    padding: theme.spacing(4),
+    padding: theme.spacing(6),
     backgroundColor: theme.palette.background.default
   },
   title: {
-    marginBottom: theme.spacing(3),
-    fontWeight: theme.typography.fontWeightBold,
+    marginBottom: theme.spacing(4),
+    fontWeight: 700,
     color: theme.palette.text.primary
   },
   playlistContainer: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: theme.spacing(3)
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: theme.spacing(4),
+    justifyItems: "center",
+    backgroundColor: "transparent"
   },
   playlistItem: {
-    minWidth: 240,
-    maxWidth: 300
+    width: 220
   },
   card: {
     borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[3],
+    transition: "transform 0.3s ease",
     "&:hover": {
-      transform: "scale(1.03)"
+      transform: "scale(1.05)"
     }
   },
   cardMedia: {
-    objectFit: "cover"
+    height: 280,
+    objectFit: "cover",
+    borderTopLeftRadius: theme.shape.borderRadius,
+    borderTopRightRadius: theme.shape.borderRadius
+  },
+  cardContent: {
+    padding: theme.spacing(2),
+    textAlign: "center"
   },
   cardTitle: {
     fontWeight: theme.typography.fontWeightMedium,
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(0.5)
   }
 }));
