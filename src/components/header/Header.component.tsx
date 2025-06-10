@@ -19,7 +19,9 @@ interface HeaderProps {
 
 export default function Header(props: HeaderProps) {
   const [searchValue, setSearchValue] = useState<string>("");
+
   const { classes } = useStyles();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -34,6 +36,14 @@ export default function Header(props: HeaderProps) {
   return (
     <AppBar position="static" elevation={1} className={classes.appBar}>
       <Toolbar className={classes.toolbar}>
+        <Box className={classes.navLinks}>
+          <Button variant="text" onClick={() => navigate("/")}>
+            Home
+          </Button>
+          <Button variant="text" onClick={() => navigate("/playlists")}>
+            Playlists
+          </Button>
+        </Box>
         <Box className={classes.leftSide}>
           <TextField
             id="search-track"

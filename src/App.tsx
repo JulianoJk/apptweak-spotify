@@ -1,7 +1,7 @@
 import "./App.css";
 import { FC, ReactElement, useState } from "react";
 import { useSelector } from "react-redux";
-import { HashRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";

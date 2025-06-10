@@ -45,5 +45,10 @@ export const useStyles = makeStyles()((theme) => ({
   toggleBox: {
     display: "flex",
     alignItems: "center"
+  },
+  navLinks: {
+    display: "flex",
+    gap: theme.spacing(2),
+    alignItems: "center"
   }
 }));
