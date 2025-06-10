@@ -1,7 +1,6 @@
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
 import ToggleColorMode from "../ui/ToggleColorMode.component";
@@ -10,6 +9,7 @@ import { fetchTracks } from "../../containers/tracks/slice";
 import { Button } from "@mui/material";
 import { useStyles } from "./Header.styles";
 import { useNavigate } from "react-router";
+import { openCreateModal } from "../../containers/playlist/slice";
 
 interface HeaderProps {
   mode: "light" | "dark";
@@ -21,38 +21,46 @@ export default function Header(props: HeaderProps) {
   const dispatch = useDispatch();
   const { classes } = useStyles();
   const navigate = useNavigate();
+
   const searchTracks = () => {
     dispatch(fetchTracks(searchValue));
     navigate("/search/tracks");
   };
+  const createPlaylist = () => {
+    dispatch(openCreateModal());
+    navigate("/playlists");
+  };
+
   return (
     <AppBar position="static" elevation={1} className={classes.appBar}>
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6" className={classes.title}>
-          Spotify Clone
-        </Typography>
-
-        <Box className={classes.searchSection}>
+      <Toolbar className={classes.toolbar}>
+        <Box className={classes.leftSide}>
           <TextField
-            id="standard-basic"
+            id="search-track"
             label="Search for a track"
             className={classes.textField}
             slotProps={{
               input: {
                 style: {
-                  borderRadius: "3em"
+                  borderRadius: "1em"
                 }
               }
             }}
             onChange={(event) => setSearchValue(event.target.value)}
+            onKeyDown={(event) => event.key === "Enter" && searchTracks()}
           />
           <Button variant="outlined" className={classes.searchButton} onClick={searchTracks}>
             Search
           </Button>
         </Box>
 
-        <Box className={classes.toggleBox}>
-          <ToggleColorMode {...props} />
+        <Box className={classes.rightSide}>
+          <Button variant="outlined" className={classes.playlistButton} onClick={createPlaylist}>
+            Add new playlist
+          </Button>
+          <Box className={classes.toggleBox}>
+            <ToggleColorMode {...props} />
+          </Box>
         </Box>
       </Toolbar>
     </AppBar>

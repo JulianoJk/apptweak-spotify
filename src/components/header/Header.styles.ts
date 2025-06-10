@@ -6,31 +6,44 @@ export const useStyles = makeStyles()((theme) => ({
     color: theme.palette.text.primary,
     padding: theme.spacing(1, 2)
   },
-  title: {
-    flexShrink: 0,
-    fontWeight: theme.typography.fontWeightBold
-  },
-  searchSection: {
-    width: "30em",
-    marginInline: theme.spacing(4),
+  toolbar: {
     display: "flex",
-    gap: theme.spacing(1),
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  leftSide: {
+    display: "flex",
     alignItems: "center",
-    justifyContent: "flex-start"
+    gap: theme.spacing(2),
+    flexGrow: 1,
+    maxWidth: "600px"
+  },
+  rightSide: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(2)
   },
   textField: {
-    width: "100%"
+    flexGrow: 1
   },
   searchButton: {
     height: "2.5em",
-    borderRadius: "3em",
+    borderRadius: "0.5em",
     textTransform: "none",
     fontWeight: 500,
     paddingInline: theme.spacing(2),
     borderColor: theme.palette.divider,
     color: theme.palette.text.primary
   },
+  playlistButton: {
+    height: "2.5em",
+    borderRadius: "0.5em",
+    textTransform: "none",
+    fontWeight: 500,
+    paddingInline: theme.spacing(2)
+  },
   toggleBox: {
-    flexShrink: 0
+    display: "flex",
+    alignItems: "center"
   }
 }));
