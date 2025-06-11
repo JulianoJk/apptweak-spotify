@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import {
   Avatar,
+  Checkbox,
   Group,
   ScrollArea,
   Table,
   Text,
   TextInput,
-  UnstyledButton,
-  Center
+  Tooltip,
+  ActionIcon
 } from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -16,32 +17,7 @@ import { fetchTracks } from "../../containers/tracks/slice";
 import { RequestStatus } from "../../types/requests";
 import LoadingIndicator from "../ui/LoadingIndicator.component";
 import ErrorMessage from "../ui/ErrorMessage.component";
-import { IconChevronDown, IconChevronUp, IconSelector, IconSearch } from "@tabler/icons-react";
-
-interface ThProps {
-  children: React.ReactNode;
-  reversed: boolean;
-  sorted: boolean;
-  onSort: () => void;
-}
-
-function SortableHeader({ children, reversed, sorted, onSort }: ThProps) {
-  const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
-  return (
-    <Table.Th>
-      <UnstyledButton onClick={onSort}>
-        <Group justify="space-between">
-          <Text fw={500} fz="sm">
-            {children}
-          </Text>
-          <Center>
-            <Icon size={16} stroke={1.5} />
-          </Center>
-        </Group>
-      </UnstyledButton>
-    </Table.Th>
-  );
-}
+import { IconPlaylistAdd, IconSearch } from "@tabler/icons-react";
 
 const TrackList = () => {
   const dispatch = useDispatch();
@@ -50,8 +26,7 @@ const TrackList = () => {
 
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(tracks);
-  const [sortBy, setSortBy] = useState<keyof (typeof tracks)[0] | null>(null);
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [selection, setSelection] = useState<string[]>([]);
 
   useEffect(() => {
     if (query && tracks.length === 0 && status === RequestStatus.IDLE) {
@@ -63,41 +38,43 @@ const TrackList = () => {
     setSortedData(tracks);
   }, [tracks]);
 
+  const toggleRow = (id: string) =>
+    setSelection((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+    );
+
+  const toggleAll = () =>
+    setSelection((current) => (current.length === tracks.length ? [] : tracks.map((t) => t.id)));
+
   if (status === RequestStatus.PENDING) return <LoadingIndicator />;
   if (status === RequestStatus.ERROR)
     return <ErrorMessage message={error || "Something went wrong"} />;
 
-  const setSorting = (field: keyof (typeof tracks)[0]) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
-    const sorted = [...tracks].sort((a, b) => {
-      const aVal = a[field]?.toString().toLowerCase() ?? "";
-      const bVal = b[field]?.toString().toLowerCase() ?? "";
-      return reversed ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
-    });
-    setSortedData(sorted);
-  };
-
-  const rows = sortedData.map((track) => (
-    <Table.Tr key={track.id}>
-      <Table.Td>
-        <Group gap="sm">
-          <Avatar size={76} src={track.albumImage} radius="sm" />
-          <div>
-            <Text size="sm" fw={500}>
-              {track.name}
-            </Text>
-            <Text size="xs" c="dimmed">
-              {track.artist}
-            </Text>
-          </div>
-        </Group>
-      </Table.Td>
-      <Table.Td>{track.album}</Table.Td>
-      <Table.Td>{track.albumReleaseDate}</Table.Td>
-    </Table.Tr>
-  ));
+  const rows = sortedData.map((track) => {
+    const selected = selection.includes(track.id);
+    return (
+      <Table.Tr key={track.id} style={{ backgroundColor: selected ? "#2c2e33" : "inherit" }}>
+        <Table.Td>
+          <Checkbox checked={selected} onChange={() => toggleRow(track.id)} />
+        </Table.Td>
+        <Table.Td>
+          <Group gap="sm">
+            <Avatar size={76} src={track.albumImage} radius="sm" />
+            <div>
+              <Text size="sm" fw={500}>
+                {track.name}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {track.artist}
+              </Text>
+            </div>
+          </Group>
+        </Table.Td>
+        <Table.Td>{track.album}</Table.Td>
+        <Table.Td>{track.albumReleaseDate}</Table.Td>
+      </Table.Tr>
+    );
+  });
 
   return (
     <ScrollArea>
@@ -107,42 +84,48 @@ const TrackList = () => {
         leftSection={<IconSearch size={16} stroke={1.5} />}
         value={search}
         onChange={(e) => {
-          setSearch(e.currentTarget.value);
+          const value = e.currentTarget.value;
+          setSearch(value);
           const filtered = tracks.filter(
             (track) =>
-              track.name.toLowerCase().includes(e.currentTarget.value.toLowerCase()) ||
-              track.artist.toLowerCase().includes(e.currentTarget.value.toLowerCase()) ||
-              track.album.toLowerCase().includes(e.currentTarget.value.toLowerCase())
+              track.name.toLowerCase().includes(value.toLowerCase()) ||
+              track.artist.toLowerCase().includes(value.toLowerCase()) ||
+              track.album.toLowerCase().includes(value.toLowerCase())
           );
           setSortedData(filtered);
         }}
       />
+
       <Table miw={800} verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
-            <SortableHeader
-              sorted={sortBy === "name"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("name")}
-            >
-              Track
-            </SortableHeader>
-            <SortableHeader
-              sorted={sortBy === "album"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("album")}
-            >
-              Album
-            </SortableHeader>
-            <SortableHeader
-              sorted={sortBy === "albumReleaseDate"}
-              reversed={reverseSortDirection}
-              onSort={() => setSorting("albumReleaseDate")}
-            >
-              Release Date
-            </SortableHeader>
+            <Table.Th w={40}>
+              <Checkbox
+                onChange={toggleAll}
+                checked={selection.length === tracks.length}
+                indeterminate={selection.length > 0 && selection.length !== tracks.length}
+              />
+            </Table.Th>
+            <Table.Th>Track</Table.Th>
+            <Table.Th>Album</Table.Th>
+            <Table.Th>Release Date</Table.Th>
+            <Table.Th w={60}>
+              {selection.length > 0 ? (
+                <Tooltip label="Add selected to playlist" withArrow>
+                  <ActionIcon
+                    variant="filled"
+                    onClick={() => console.log("Add selected tracks to playlist", selection)}
+                    color="blue"
+                    aria-label="Add to Playlist"
+                  >
+                    <IconPlaylistAdd style={{ width: "70%", height: "70%" }} stroke={1.5} />
+                  </ActionIcon>
+                </Tooltip>
+              ) : null}
+            </Table.Th>
           </Table.Tr>
         </Table.Thead>
+
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
     </ScrollArea>
