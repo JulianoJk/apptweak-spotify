@@ -48,6 +48,10 @@ export const createSpotifyPlaylistSuccess = createAction("spotify/createSpotifyP
 export const createSpotifyPlaylistError = createAction<ErrorPayload>(
   "spotify/createSpotifyPlaylistError"
 );
+export const getSinglePlaylist = createAction<string>("spotify/fetchSinglePlaylist");
+export const getSinglePlaylistSuccess = createAction<IPersonalPlaylist>(
+  "spotify/fetchSinglePlaylistSuccess"
+);
 
 const playlistSlice = createSlice({
   name: "userPlaylists",
@@ -114,6 +118,12 @@ const playlistSlice = createSlice({
       .addCase(createSpotifyPlaylistError, (state, action) => {
         state.status = RequestStatus.ERROR;
         state.error = action.payload.message;
+      })
+      .addCase(getSinglePlaylistSuccess, (state, action) => {
+        const exists = state.personalPlaylists.find((p) => p.id === action.payload.id);
+        if (!exists) {
+          state.personalPlaylists.push(action.payload);
+        }
       });
   }
 });

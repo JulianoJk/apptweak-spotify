@@ -25,7 +25,7 @@ interface ThProps {
   onSort: () => void;
 }
 
-function Th({ children, reversed, sorted, onSort }: ThProps) {
+function SortableHeader({ children, reversed, sorted, onSort }: ThProps) {
   const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
   return (
     <Table.Th>
@@ -54,10 +54,10 @@ const TrackList = () => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
   useEffect(() => {
-    if (query && tracks.length === 0) {
+    if (query && tracks.length === 0 && status === RequestStatus.IDLE) {
       dispatch(fetchTracks(query));
     }
-  }, [query]);
+  }, [dispatch, query, tracks.length, status]);
 
   useEffect(() => {
     setSortedData(tracks);
@@ -120,27 +120,27 @@ const TrackList = () => {
       <Table miw={800} verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
-            <Th
+            <SortableHeader
               sorted={sortBy === "name"}
               reversed={reverseSortDirection}
               onSort={() => setSorting("name")}
             >
               Track
-            </Th>
-            <Th
+            </SortableHeader>
+            <SortableHeader
               sorted={sortBy === "album"}
               reversed={reverseSortDirection}
               onSort={() => setSorting("album")}
             >
               Album
-            </Th>
-            <Th
+            </SortableHeader>
+            <SortableHeader
               sorted={sortBy === "albumReleaseDate"}
               reversed={reverseSortDirection}
               onSort={() => setSorting("albumReleaseDate")}
             >
               Release Date
-            </Th>
+            </SortableHeader>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>

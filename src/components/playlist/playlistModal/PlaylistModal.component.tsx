@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { closeCreateModal, createSpotifyPlaylist } from "../../../containers/playlist/slice";
+
 import { RootState } from "../../../store/store";
 import { useStyles } from "./PlaylistModal.styles";
 import { Box, Button, Divider, Modal, Text, Textarea, TextInput } from "@mantine/core";
+import { closeCreateModal, createSpotifyPlaylist } from "../../../containers/playlist/slice";
 
 const PlaylistModal = () => {
   const { classes } = useStyles();

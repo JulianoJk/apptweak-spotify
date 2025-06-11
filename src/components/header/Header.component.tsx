@@ -6,6 +6,7 @@ import ToggleColorMode from "../ui/ToggleColorMode.component";
 import { openCreateModal } from "../../containers/playlist/slice";
 import PlaylistModal from "../playlist/playlistModal/PlaylistModal.component";
 import { useNavigate } from "react-router";
+import { fetchTracks } from "../../containers/tracks/slice";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");
@@ -15,7 +16,8 @@ export default function Header() {
   const dispatch = useDispatch();
 
   const searchTracks = () => {
-    navigate("/search/tracks/:" + searchValue);
+    dispatch(fetchTracks(searchValue));
+    navigate("/search/tracks/" + searchValue);
   };
 
   const createPlaylist = () => {
