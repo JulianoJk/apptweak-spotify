@@ -3,6 +3,7 @@ import axios from "axios";
 import { SagaIterator } from "redux-saga";
 import { selectAccessToken } from "../auth/selectors";
 import {
+  addTracksToPlaylists,
   createSpotifyPlaylist,
   createSpotifyPlaylistError,
   createSpotifyPlaylistSuccess,
@@ -100,6 +101,35 @@ function* createSpotifyPlaylistWorker(
     yield put(createSpotifyPlaylistError({ message: error.message }));
   }
 }
+function* addTracksToPlaylistsWorker(
+  action: PayloadAction<{ playlistIds: string[]; trackUris: string[] }>
+): SagaIterator {
+  try {
+    const token: string = yield select(selectAccessToken);
+
+    for (const playlistId of action.payload.playlistIds) {
+      yield call(() =>
+        axios.post(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+          {
+            uris: action.payload.trackUris
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        )
+      );
+    }
+
+    yield put(getPersonalPlaylists());
+  } catch (error: any) {
+    // TODO!: Handle error
+    console.error("Error adding tracks:", error.message);
+  }
+}
 
 function* fetchSinglePlaylistWorker(action: PayloadAction<string>): SagaIterator {
   try {
@@ -115,4 +145,5 @@ export default function* playlistSaga() {
   yield takeLatest(getPersonalPlaylists.type, fetchPersonalWorker);
   yield takeLatest(createSpotifyPlaylist.type, createSpotifyPlaylistWorker);
   yield takeLatest(getSinglePlaylist.type, fetchSinglePlaylistWorker);
+  yield takeLatest(addTracksToPlaylists.type, addTracksToPlaylistsWorker);
 }

@@ -1,16 +1,23 @@
 import { rem } from "@mantine/core";
 import { createStyles } from "@mantine/emotion";
 
-export const useStyles = createStyles((theme, _, u) => ({
+interface StyleProps {
+  disableHover?: boolean;
+}
+
+export const useStyles = createStyles((theme, { disableHover }: StyleProps) => ({
   card: {
     height: rem(340),
     display: "flex",
     flexDirection: "column",
     transition: "transform 0.3s ease",
-
-    "&:hover": {
-      transform: "scale(1.02)"
-    }
+    ...(disableHover
+      ? {}
+      : {
+          "&:hover": {
+            transform: "scale(1.02)"
+          }
+        })
   },
 
   image: {

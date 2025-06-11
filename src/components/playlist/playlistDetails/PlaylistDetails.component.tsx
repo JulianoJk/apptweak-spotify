@@ -68,8 +68,8 @@ const PlaylistDetails = () => {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {playlist.tracks.map((track) => (
-              <Table.Tr key={track.id}>
+            {playlist.tracks.map((track, index) => (
+              <Table.Tr key={`${track.id}-${index}`}>
                 <Table.Td>
                   <Group>
                     <Avatar src={track.albumImage} size={60} radius="sm" />

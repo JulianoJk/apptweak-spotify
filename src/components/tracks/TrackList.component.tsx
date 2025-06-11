@@ -18,6 +18,8 @@ import { RequestStatus } from "../../types/requests";
 import LoadingIndicator from "../ui/LoadingIndicator.component";
 import ErrorMessage from "../ui/ErrorMessage.component";
 import { IconPlaylistAdd, IconSearch } from "@tabler/icons-react";
+import TrackToPlaylist from "../playlist/trackToPlaylistModal/TrackToPlaylistModal.component";
+import { openPlaylistSelectModal } from "../../containers/playlist/slice";
 
 const TrackList = () => {
   const dispatch = useDispatch();
@@ -26,7 +28,7 @@ const TrackList = () => {
 
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(tracks);
-  const [selection, setSelection] = useState<string[]>([]);
+  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
 
   useEffect(() => {
     if (query && tracks.length === 0 && status === RequestStatus.IDLE) {
@@ -39,19 +41,25 @@ const TrackList = () => {
   }, [tracks]);
 
   const toggleRow = (id: string) =>
-    setSelection((current) =>
+    setSelectedTracks((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
     );
 
   const toggleAll = () =>
-    setSelection((current) => (current.length === tracks.length ? [] : tracks.map((t) => t.id)));
+    setSelectedTracks((current) =>
+      current.length === tracks.length ? [] : tracks.map((t) => t.id)
+    );
+
+  const handleOpenPlaylistModal = () => {
+    dispatch(openPlaylistSelectModal());
+  };
 
   if (status === RequestStatus.PENDING) return <LoadingIndicator />;
   if (status === RequestStatus.ERROR)
     return <ErrorMessage message={error || "Something went wrong"} />;
 
   const rows = sortedData.map((track) => {
-    const selected = selection.includes(track.id);
+    const selected = selectedTracks.includes(track.id);
     return (
       <Table.Tr key={track.id} style={{ backgroundColor: selected ? "#2c2e33" : "inherit" }}>
         <Table.Td>
@@ -102,19 +110,19 @@ const TrackList = () => {
             <Table.Th w={40}>
               <Checkbox
                 onChange={toggleAll}
-                checked={selection.length === tracks.length}
-                indeterminate={selection.length > 0 && selection.length !== tracks.length}
+                checked={selectedTracks.length === tracks.length}
+                indeterminate={selectedTracks.length > 0 && selectedTracks.length !== tracks.length}
               />
             </Table.Th>
             <Table.Th>Track</Table.Th>
             <Table.Th>Album</Table.Th>
             <Table.Th>Release Date</Table.Th>
             <Table.Th w={60}>
-              {selection.length > 0 ? (
+              {selectedTracks.length > 0 ? (
                 <Tooltip label="Add selected to playlist" withArrow>
                   <ActionIcon
                     variant="filled"
-                    onClick={() => console.log("Add selected tracks to playlist", selection)}
+                    onClick={handleOpenPlaylistModal}
                     color="blue"
                     aria-label="Add to Playlist"
                   >
@@ -128,6 +136,7 @@ const TrackList = () => {
 
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
+      <TrackToPlaylist selectedTrackIds={selectedTracks} />
     </ScrollArea>
   );
 };

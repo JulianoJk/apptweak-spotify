@@ -22,6 +22,7 @@ interface PlaylistState {
   personalPlaylists: IPersonalPlaylist[];
   selectedPlaylistId?: string;
   isModalOpen: boolean;
+  playlistSelectorModal: boolean;
   status: RequestStatus;
   error?: string;
 }
@@ -31,6 +32,7 @@ const initialState: PlaylistState = {
   personalPlaylists: [],
   selectedPlaylistId: undefined,
   isModalOpen: false,
+  playlistSelectorModal: false,
   status: RequestStatus.IDLE
 };
 export const getPersonalPlaylists = createAction("spotify/fetchpersonalPlaylists");
@@ -52,6 +54,10 @@ export const getSinglePlaylist = createAction<string>("spotify/fetchSinglePlayli
 export const getSinglePlaylistSuccess = createAction<IPersonalPlaylist>(
   "spotify/fetchSinglePlaylistSuccess"
 );
+export const addTracksToPlaylists = createAction<{
+  playlistIds: string[];
+  trackUris: string[];
+}>("spotify/addTracksToPlaylists");
 
 const playlistSlice = createSlice({
   name: "userPlaylists",
@@ -97,6 +103,12 @@ const playlistSlice = createSlice({
     },
     closeCreateModal(state) {
       state.isModalOpen = false;
+    },
+    openPlaylistSelectModal(state) {
+      state.playlistSelectorModal = true;
+    },
+    closePlaylistSelectModal(state) {
+      state.playlistSelectorModal = false;
     }
   },
   extraReducers: (builder) => {
@@ -135,7 +147,9 @@ export const {
   addTrackToPlaylist,
   removeTrackFromPlaylist,
   openCreateModal,
-  closeCreateModal
+  closeCreateModal,
+  openPlaylistSelectModal,
+  closePlaylistSelectModal
 } = playlistSlice.actions;
 
 export default playlistSlice.reducer;
