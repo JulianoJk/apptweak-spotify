@@ -2,7 +2,6 @@ import {
   Box,
   Modal,
   Text,
-  Title,
   Button,
   SimpleGrid,
   Group,

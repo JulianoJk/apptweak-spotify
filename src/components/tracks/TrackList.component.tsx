@@ -6,7 +6,6 @@ import {
   ScrollArea,
   Table,
   Text,
-  TextInput,
   Tooltip,
   ActionIcon
 } from "@mantine/core";
@@ -17,7 +16,7 @@ import { fetchTracks } from "../../containers/tracks/slice";
 import { RequestStatus } from "../../types/requests";
 import LoadingIndicator from "../ui/LoadingIndicator.component";
 import ErrorMessage from "../ui/ErrorMessage.component";
-import { IconPlaylistAdd, IconSearch } from "@tabler/icons-react";
+import { IconPlaylistAdd } from "@tabler/icons-react";
 import TrackToPlaylist from "../playlist/trackToPlaylistModal/TrackToPlaylistModal.component";
 import { openPlaylistSelectModal } from "../../containers/playlist/slice";
 
@@ -26,7 +25,6 @@ const TrackList = () => {
   const { query } = useParams<{ query: string }>();
   const { tracks, status, error } = useSelector((state: RootState) => state.spotifyTracks);
 
-  const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(tracks);
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
 
@@ -86,24 +84,6 @@ const TrackList = () => {
 
   return (
     <ScrollArea>
-      <TextInput
-        placeholder="Search tracks"
-        mb="md"
-        leftSection={<IconSearch size={16} stroke={1.5} />}
-        value={search}
-        onChange={(e) => {
-          const value = e.currentTarget.value;
-          setSearch(value);
-          const filtered = tracks.filter(
-            (track) =>
-              track.name.toLowerCase().includes(value.toLowerCase()) ||
-              track.artist.toLowerCase().includes(value.toLowerCase()) ||
-              track.album.toLowerCase().includes(value.toLowerCase())
-          );
-          setSortedData(filtered);
-        }}
-      />
-
       <Table miw={800} verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
