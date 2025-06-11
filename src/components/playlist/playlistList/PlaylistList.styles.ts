@@ -1,45 +1,38 @@
-import { makeStyles } from "tss-react/mui";
+import { rem } from "@mantine/core";
+import { createStyles } from "@mantine/emotion";
 
-export const useStyles = makeStyles()((theme) => ({
-  root: {
-    padding: theme.spacing(6),
-    backgroundColor: theme.palette.background.default
-  },
-  title: {
-    marginBottom: theme.spacing(4),
-    fontWeight: 700,
-    color: theme.palette.text.primary
-  },
-  playlistContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-    gap: theme.spacing(4),
-    justifyItems: "center",
-    backgroundColor: "transparent"
-  },
-  playlistItem: {
-    width: 220
-  },
+export const useStyles = createStyles((theme, _, u) => ({
   card: {
-    borderRadius: theme.shape.borderRadius,
-    boxShadow: theme.shadows[3],
+    height: rem(340),
+    display: "flex",
+    flexDirection: "column",
     transition: "transform 0.3s ease",
+
     "&:hover": {
-      transform: "scale(1.05)"
+      transform: "scale(1.02)"
     }
   },
-  cardMedia: {
-    height: 280,
+
+  image: {
+    height: rem(200),
+    width: "100%",
     objectFit: "cover",
-    borderTopLeftRadius: theme.shape.borderRadius,
-    borderTopRightRadius: theme.shape.borderRadius
+    borderRadius: theme.radius.md
   },
-  cardContent: {
-    padding: theme.spacing(2),
-    textAlign: "center"
+
+  textWrapper: {
+    paddingTop: theme.spacing.md
   },
-  cardTitle: {
-    fontWeight: theme.typography.fontWeightMedium,
-    marginBottom: theme.spacing(0.5)
+
+  title: {
+    fontSize: theme.fontSizes.xl,
+    fontWeight: 700,
+    lineHeight: 1.2
+  },
+
+  subtitle: {
+    color: theme.colors.gray[6],
+    fontSize: theme.fontSizes.sm,
+    marginTop: rem(4)
   }
 }));

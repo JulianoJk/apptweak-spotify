@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { Box, Typography, Modal, TextField, Button, Divider } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { closeCreateModal, createPlaylist } from "../../../containers/playlist/slice";
+import { closeCreateModal, createSpotifyPlaylist } from "../../../containers/playlist/slice";
 import { RootState } from "../../../store/store";
-import { useNavigate } from "react-router";
 import { useStyles } from "./PlaylistModal.styles";
+import { Box, Button, Divider, Modal, Text, Textarea, TextInput } from "@mantine/core";
 
 const PlaylistModal = () => {
   const { classes } = useStyles();
@@ -14,13 +13,11 @@ const PlaylistModal = () => {
   const [description, setDescription] = useState("");
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const handleCreate = () => {
     if (name.trim()) {
-      dispatch(createPlaylist({ name, description }));
+      dispatch(createSpotifyPlaylist({ name, description }));
       dispatch(closeCreateModal());
-      navigate("/playlists");
       setName("");
       setDescription("");
     }
@@ -33,38 +30,33 @@ const PlaylistModal = () => {
   };
 
   return (
-    <Modal open={isModalOpen} onClose={handleClose}>
-      <Box className={classes.modal}>
-        <Typography variant="h5" className={classes.title}>
+    <Modal opened={isModalOpen} onClose={handleClose}>
+      <Box>
+        <Text fw={700} className={classes.title}>
           Create New Playlist
-        </Typography>
+        </Text>
 
         <Divider />
 
-        <TextField
+        <TextInput
           label="Playlist name"
-          variant="outlined"
-          fullWidth
+          placeholder="Playlist name"
           className={classes.input}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <TextField
+        <Textarea
+          variant="filled"
           label="Description (optional)"
-          variant="outlined"
-          fullWidth
-          multiline
-          minRows={3}
+          placeholder="Description (optional)"
           className={classes.input}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
         <Box className={classes.actions}>
-          <Button onClick={handleClose} color="inherit">
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleCreate} disabled={!name.trim()}>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCreate} disabled={!name.trim()}>
             Create Playlist
           </Button>
         </Box>

@@ -1,79 +1,73 @@
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import TextField from "@mui/material/TextField";
 import { useState } from "react";
-import ToggleColorMode from "../ui/ToggleColorMode.component";
 import { useDispatch } from "react-redux";
-import { fetchTracks } from "../../containers/tracks/slice";
-import { Button } from "@mui/material";
+import { Box, Button, Card, Group, Input } from "@mantine/core";
 import { useStyles } from "./Header.styles";
+import ToggleColorMode from "../ui/ToggleColorMode.component";
 import { openCreateModal } from "../../containers/playlist/slice";
 import PlaylistModal from "../playlist/playlistModal/PlaylistModal.component";
 import { useNavigate } from "react-router";
 
-interface HeaderProps {
-  mode: "light" | "dark";
-  setMode: () => void;
-}
-
-export default function Header(props: HeaderProps) {
-  const [searchValue, setSearchValue] = useState<string>("");
+export default function Header() {
+  const [searchValue, setSearchValue] = useState("");
 
   const { classes } = useStyles();
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const searchTracks = () => {
-    dispatch(fetchTracks(searchValue));
-    navigate("/search/tracks");
+    navigate("/search/tracks/:" + searchValue);
   };
+
   const createPlaylist = () => {
     dispatch(openCreateModal());
   };
 
   return (
-    <AppBar position="static" elevation={1} className={classes.appBar}>
-      <Toolbar className={classes.toolbar}>
-        <Box className={classes.navLinks}>
-          <Button variant="text" onClick={() => navigate("/")}>
-            Home
-          </Button>
-          <Button variant="text" onClick={() => navigate("/playlists")}>
-            Playlists
-          </Button>
-        </Box>
-        <Box className={classes.leftSide}>
-          <TextField
-            id="search-track"
-            label="Search for a track"
-            className={classes.textField}
-            slotProps={{
-              input: {
-                style: {
-                  borderRadius: "1em"
-                }
-              }
-            }}
-            onChange={(event) => setSearchValue(event.target.value)}
-            onKeyDown={(event) => event.key === "Enter" && searchTracks()}
-          />
-          <Button variant="outlined" className={classes.searchButton} onClick={searchTracks}>
-            Search
-          </Button>
-        </Box>
+    <>
+      <Card radius="md" className={classes.appBar}>
+        <Group className={classes.inner} p="apart">
+          <Group className={classes.navLinks} gap="md">
+            <Button variant="subtle" onClick={() => navigate("/")}>
+              Home
+            </Button>
+            <Button variant="subtle" onClick={() => navigate("/playlists")}>
+              Playlists
+            </Button>
+          </Group>
 
-        <Box className={classes.rightSide}>
-          <Button variant="outlined" className={classes.playlistButton} onClick={createPlaylist}>
-            Add new playlist
-          </Button>
-          <Box className={classes.toggleBox}>
-            <ToggleColorMode {...props} />
-          </Box>
-        </Box>
-      </Toolbar>
+          <Group className={classes.leftSide} gap="sm">
+            <Input
+              id="search-track"
+              size="lg"
+              radius="lg"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.currentTarget.value)}
+              onKeyDown={(e) => e.key === "Enter" && searchTracks()}
+              placeholder="Search for a track"
+              className={classes.textField}
+            />
+
+            <Button
+              variant="default"
+              onClick={searchTracks}
+              className={classes.searchButton}
+              disabled={!searchValue}
+            >
+              Search
+            </Button>
+          </Group>
+
+          <Group className={classes.rightSide} gap="sm">
+            <Button variant="default" onClick={createPlaylist} className={classes.playlistButton}>
+              Add new playlist
+            </Button>
+            <Box className={classes.toggleBox}>
+              <ToggleColorMode />
+            </Box>
+          </Group>
+        </Group>
+      </Card>
       <PlaylistModal />
-    </AppBar>
+    </>
   );
 }

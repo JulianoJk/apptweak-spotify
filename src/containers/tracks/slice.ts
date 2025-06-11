@@ -26,8 +26,6 @@ export const fetchTracks = createAction<string>("spotify/fetchTracks");
 export const getTracksError = createAction<ErrorPayload>("spotify/setTracksError");
 export const getTrackSuccess = createAction<ITrack[]>("spotify/setTrackSuccess");
 
-export const getHomePlaylistsError = createAction<ErrorPayload>("spotify/setHomePlaylistsError");
-
 const tracksSlice = createSlice({
   name: "spotifyTracks",
   initialState,
