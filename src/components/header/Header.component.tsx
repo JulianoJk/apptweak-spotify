@@ -28,9 +28,6 @@ export default function Header() {
         <Group className={classes.inner} p="apart">
           <Group className={classes.navLinks} gap="md">
             <Button variant="subtle" onClick={() => navigate("/")}>
-              Home
-            </Button>
-            <Button variant="subtle" onClick={() => navigate("/playlists")}>
               Playlists
             </Button>
           </Group>

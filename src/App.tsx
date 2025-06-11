@@ -25,8 +25,7 @@ const App: FC = (): ReactElement => {
             </AppShell.Header>
             <AppShell.Main style={{ marginTop: "6rem" }}>
               <Routes>
-                <Route path="/" element={<h1>hello</h1>} />
-                <Route path="/playlists" element={<PlaylistList />} />
+                <Route path="/" element={<PlaylistList />} />
                 <Route path="/search/tracks/:query" element={<TrackList />} />
                 <Route path="/*" element={<h1>test route</h1>} />
                 {/* <Route path="/playlist/:id" element={<PlaylistList />} /> */}
