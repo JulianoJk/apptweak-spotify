@@ -8,17 +8,18 @@ export interface IUserPlaylist {
   description?: string;
   tracks: ITrack[];
 }
-export interface IRandomPlaylist {
+export interface IPersonalPlaylist {
   id: string;
   name: string;
   image: string;
   description?: string;
   spotifyUrl: string;
+  owner: { display_name: string };
   tracks: ITrack[];
 }
 interface PlaylistState {
   playlists: IUserPlaylist[];
-  randomPlaylists: IRandomPlaylist[];
+  personalPlaylists: IPersonalPlaylist[];
   selectedPlaylistId?: string;
   isModalOpen: boolean;
   status: RequestStatus;
@@ -27,17 +28,25 @@ interface PlaylistState {
 
 const initialState: PlaylistState = {
   playlists: [],
-  randomPlaylists: [],
+  personalPlaylists: [],
   selectedPlaylistId: undefined,
   isModalOpen: false,
   status: RequestStatus.IDLE
 };
-export const getRandomPlaylists = createAction("spotify/fetchRandomPlaylists");
-export const getRandomPlaylistsSuccess = createAction<IRandomPlaylist[]>(
-  "spotify/fetchRandomPlaylistsSuccess"
+export const getPersonalPlaylists = createAction("spotify/fetchpersonalPlaylists");
+export const getPersonalPlaylistsSuccess = createAction<IPersonalPlaylist[]>(
+  "spotify/fetchpersonalPlaylistsSuccess"
 );
-export const getRandomPlaylistsError = createAction<ErrorPayload>(
-  "spotify/fetchRandomPlaylistsError"
+export const getPersonalPlaylistsError = createAction<ErrorPayload>(
+  "spotify/fetchpersonalPlaylistsError"
+);
+
+export const createSpotifyPlaylist = createAction<{ name: string; description?: string }>(
+  "spotify/createSpotifyPlaylist"
+);
+export const createSpotifyPlaylistSuccess = createAction("spotify/createSpotifyPlaylistSuccess");
+export const createSpotifyPlaylistError = createAction<ErrorPayload>(
+  "spotify/createSpotifyPlaylistError"
 );
 
 const playlistSlice = createSlice({
@@ -88,14 +97,21 @@ const playlistSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getRandomPlaylists, (state) => {
+      .addCase(getPersonalPlaylists, (state) => {
         state.status = RequestStatus.PENDING;
       })
-      .addCase(getRandomPlaylistsSuccess, (state, action) => {
+      .addCase(getPersonalPlaylistsSuccess, (state, action) => {
         state.status = RequestStatus.SUCCESS;
-        state.randomPlaylists = action.payload;
+        state.personalPlaylists = action.payload;
       })
-      .addCase(getRandomPlaylistsError, (state, action) => {
+      .addCase(getPersonalPlaylistsError, (state, action) => {
+        state.status = RequestStatus.ERROR;
+        state.error = action.payload.message;
+      })
+      .addCase(createSpotifyPlaylistSuccess, (state) => {
+        state.status = RequestStatus.SUCCESS;
+      })
+      .addCase(createSpotifyPlaylistError, (state, action) => {
         state.status = RequestStatus.ERROR;
         state.error = action.payload.message;
       });

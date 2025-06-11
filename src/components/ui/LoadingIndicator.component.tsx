@@ -1,15 +1,17 @@
-import { CircularProgress, Box } from "@mui/material";
+import { Box, Loader, Text } from "@mantine/core";
 
 const LoadingIndicator = () => (
   <Box
     sx={{
       display: "flex",
+      flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
       height: "60vh"
     }}
   >
-    <CircularProgress size={160} />
+    <Loader color="blue" size="10em" />
+    <Text mt="sm">Loading...</Text>
   </Box>
 );
 

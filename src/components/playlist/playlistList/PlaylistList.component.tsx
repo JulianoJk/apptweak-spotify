@@ -1,49 +1,53 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { Card, CardContent, CardMedia, Typography, Box } from "@mui/material";
-import { IUserPlaylist } from "../../../containers/playlist/slice";
+import { Box, Card, Image, SimpleGrid, Text } from "@mantine/core";
 import { useStyles } from "./PlaylistList.styles";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
+import { getPersonalPlaylists, IPersonalPlaylist } from "../../../containers/playlist/slice";
+import { useEffect } from "react";
+import LoadingIndicator from "../../ui/LoadingIndicator.component";
+import { RequestStatus } from "../../../types/requests";
+import ErrorMessage from "../../ui/ErrorMessage.component";
 
 const PlaylistList = () => {
-  // const { playlists } = useSelector((state: RootState) => state.playlistSlice);
   const { classes } = useStyles();
-  // TODO!: Change back to playlists when you implement the feature
-  const { randomPlaylists } = useSelector((state: RootState) => state.playlistSlice);
+  const { personalPlaylists, status, error } = useSelector(
+    (state: RootState) => state.playlistSlice
+  );
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getPersonalPlaylists());
+  }, [dispatch]);
+  if (status === RequestStatus.PENDING) return <LoadingIndicator />;
+  if (status === RequestStatus.ERROR)
+    return <ErrorMessage message={error || "Something went wrong"} />;
+
+  const cards = personalPlaylists.map((playlist: IPersonalPlaylist) => (
+    <Card key={playlist.name} p="md" radius="md" component="a" href="#" className={classes.card}>
+      <Image
+        src={playlist.image}
+        fallbackSrc="https://placehold.co/600x400?text=No+Image"
+        radius="md"
+        className={classes.image}
+      />
+
+      <Box className={classes.textWrapper}>
+        <Text className={classes.title}>{playlist.name}</Text>
+        <Text className={classes.subtitle}>
+          By {playlist.owner.display_name} &#x2022; {playlist.tracks.length} tracks
+        </Text>
+      </Box>
+    </Card>
+  ));
 
   return (
-    <div className={classes.root}>
-      <Typography variant="h4" className={classes.title}>
+    <Box px="xl" py="xl">
+      <Text className={classes.title} size="xl" w={700}>
         Your Playlists
-      </Typography>
-      <Box className={classes.playlistContainer}>
-        {randomPlaylists.map((playlist: IUserPlaylist) => (
-          <Box key={playlist.id} className={classes.playlistItem}>
-            <Card className={classes.card}>
-              <CardMedia
-                component="img"
-                height="280"
-                image="https://via.assets.so/album.png?id=1&q=95&w=360&h=360&fit=fill"
-                alt={playlist.name}
-                className={classes.cardMedia}
-              />
-              <CardContent className={classes.cardContent}>
-                <Typography variant="subtitle1" className={classes.cardTitle} noWrap>
-                  {playlist.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" noWrap>
-                  {playlist.description || "No description"}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {playlist.tracks.length} track{playlist.tracks.length !== 1 && "s"}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        ))}
-      </Box>
-    </div>
+      </Text>
+      <SimpleGrid spacing="xl" cols={4}>
+        {cards}
+      </SimpleGrid>
+    </Box>
   );
 };
-
 export default PlaylistList;

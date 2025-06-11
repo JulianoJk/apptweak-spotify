@@ -1,4 +1,4 @@
-import { Alert, Box } from "@mui/material";
+import { Alert, Box } from "@mantine/core";
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <Box
@@ -13,7 +13,7 @@ const ErrorMessage = ({ message }: { message: string }) => (
       zIndex: 1400
     }}
   >
-    <Alert severity="error" variant="filled" sx={{ fontSize: "1rem" }}>
+    <Alert variant="light" color="red" radius="md" title="An error occurred">
       {message}
     </Alert>
   </Box>

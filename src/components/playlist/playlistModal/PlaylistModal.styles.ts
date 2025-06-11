@@ -1,31 +1,28 @@
-import { makeStyles } from "tss-react/mui";
+import { createStyles } from "@mantine/emotion";
 
-export const useStyles = makeStyles()((theme) => ({
+export const useStyles = createStyles((theme) => ({
   modal: {
     position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
     width: "32em",
-    backgroundColor: theme.palette.background.paper,
-    borderRadius: theme.spacing(2),
-    padding: theme.spacing(4),
-    boxShadow: theme.shadows[6],
+    borderRadius: theme.spacing.md,
+    padding: theme.spacing.md,
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing(2)
+    gap: theme.spacing.md
   },
   title: {
-    fontWeight: theme.typography.fontWeightBold,
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing.sm
   },
   input: {
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing.sm
   },
   actions: {
     display: "flex",
     justifyContent: "flex-end",
-    marginTop: theme.spacing(3),
-    gap: theme.spacing(2)
+    marginTop: theme.spacing.md,
+    gap: theme.spacing.md
   }
 }));
