@@ -98,7 +98,7 @@ const TrackToPlaylistModal = (props: ITrackToPlaylistModalProps) => {
                       {playlist.name}
                     </Text>
                     <Text c="dimmed" size="xs">
-                      By {playlist.owner.display_name} • {playlist.tracks.length} tracks
+                      By {playlist.owner.display_name} &#x2022; {playlist.tracks.length} tracks
                     </Text>
                   </Box>
                 </Box>
