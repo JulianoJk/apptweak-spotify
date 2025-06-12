@@ -35,6 +35,7 @@ export default function Header() {
     if (!searchValue.trim()) return;
     dispatch(fetchTracks(searchValue));
     navigate("/search/tracks/" + searchValue);
+    setSearchValue("");
     setDrawerOpened(false);
   };
 

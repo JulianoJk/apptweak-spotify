@@ -8,9 +8,10 @@ import { RequestStatus } from "../../types/requests";
 import LoadingIndicator from "../ui/LoadingIndicator.component";
 import ErrorMessage from "../ui/ErrorMessage.component";
 import { IconPlaylistAdd } from "@tabler/icons-react";
-import TrackToPlaylist from "../playlist/trackToPlaylistModal/TrackToPlaylistModal.component";
+
 import { openPlaylistSelectModal } from "../../containers/playlist/slice";
 import TrackTableRow from "./TrackTableRow.component";
+import SelectPlaylistModal from "../playlist/selectPlaylistModal/SelectPlaylistModal.component";
 
 const TrackList = () => {
   const dispatch = useDispatch();
@@ -84,7 +85,7 @@ const TrackList = () => {
           ))}
         </Table.Tbody>
       </Table>
-      <TrackToPlaylist selectedTrackIds={selectedTracks} />
+      <SelectPlaylistModal selectedTrackIds={selectedTracks} />
     </ScrollArea>
   );
 };

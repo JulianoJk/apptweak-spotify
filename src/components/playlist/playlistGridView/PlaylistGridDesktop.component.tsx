@@ -1,5 +1,5 @@
 import { Box, Card, Image, SimpleGrid, Text } from "@mantine/core";
-import { useStyles } from "./PlaylistList.styles";
+import { useStyles } from "./PlaylistGridView.styles";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useEffect } from "react";
@@ -13,7 +13,9 @@ interface PlaylistListProps {
   context?: "modal" | "page";
 }
 
-const PlaylistList = ({ context = "page" }: PlaylistListProps) => {
+const PlaylistGridDesktop = ({ context = "page" }: PlaylistListProps) => {
+  console.log("PlaylistGridDesktop rendered");
+
   const { classes } = useStyles({ disableHover: context === "modal" });
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -78,4 +80,4 @@ const PlaylistList = ({ context = "page" }: PlaylistListProps) => {
   );
 };
 
-export default PlaylistList;
+export default PlaylistGridDesktop;

@@ -17,23 +17,26 @@ import {
 } from "../../../containers/playlist/slice";
 import { RootState } from "../../../store/store";
 import { useEffect, useState } from "react";
-import { useStyles } from "../playlistList/PlaylistList.styles";
+import { useStyles } from "../playlistGridView/PlaylistGridView.styles";
 import { RequestStatus } from "../../../types/requests";
 import { notificationAlert } from "../../ui/NotificationAlert";
+import { useMediaQuery } from "@mantine/hooks";
 
-interface ITrackToPlaylistModalProps {
+interface ISelectPlaylistModal {
   selectedTrackIds: string[];
 }
 
-const TrackToPlaylistModal = ({ selectedTrackIds }: ITrackToPlaylistModalProps) => {
-  const dispatch = useDispatch();
+const SelectPlaylistModal = ({ selectedTrackIds }: ISelectPlaylistModal) => {
   const { playlistSelectorModal, personalPlaylists, status, error } = useSelector(
     (state: RootState) => state.playlistSlice
   );
-  const userId = useSelector((state: RootState) => state.authentication.user?.userId);
   const { classes } = useStyles({ disableHover: true });
   const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([]);
   const [wasActionFired, setWasActionFired] = useState(false);
+
+  const dispatch = useDispatch();
+  const userId = useSelector((state: RootState) => state.authentication.user?.userId);
+  const matches = useMediaQuery("(min-width: 56.25em)");
 
   useEffect(() => {
     if (status === RequestStatus.IDLE) {
@@ -107,7 +110,7 @@ const TrackToPlaylistModal = ({ selectedTrackIds }: ITrackToPlaylistModalProps) 
         </Text>
         <Divider />
         <ScrollArea h="25em" scrollbars="y">
-          <SimpleGrid spacing="md" cols={3}>
+          <SimpleGrid spacing="md" cols={matches ? 3 : 1}>
             {editablePlaylists.map((playlist) => {
               const isSelected = selectedPlaylists.includes(playlist.id);
               return (
@@ -154,4 +157,4 @@ const TrackToPlaylistModal = ({ selectedTrackIds }: ITrackToPlaylistModalProps) 
   );
 };
 
-export default TrackToPlaylistModal;
+export default SelectPlaylistModal;
