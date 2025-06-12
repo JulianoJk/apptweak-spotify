@@ -41,6 +41,6 @@ function* fetchTracksWorker(action: PayloadAction<string>): SagaIterator {
     yield put(getTracksError({ message: error.message }));
   }
 }
-export default function* playListSaga() {
+export default function* trackSaga() {
   yield takeLatest(fetchTracks.type, fetchTracksWorker);
 }
