@@ -12,7 +12,10 @@ import {
   getPersonalPlaylistsSuccess,
   getSinglePlaylist,
   getSinglePlaylistSuccess,
-  IPersonalPlaylist
+  IPersonalPlaylist,
+  removeTracksFromPlaylist,
+  removeTracksFromPlaylistError,
+  removeTracksFromPlaylistSuccess
 } from "../playlist/slice";
 import { ITrack } from "../tracks/slice";
 import { PayloadAction } from "@reduxjs/toolkit";
@@ -126,7 +129,6 @@ function* addTracksToPlaylistsWorker(
 
     yield put(getPersonalPlaylists());
   } catch (error: any) {
-    // TODO!: Handle error
     console.error("Error adding tracks:", error.message);
   }
 }
@@ -141,9 +143,40 @@ function* fetchSinglePlaylistWorker(action: PayloadAction<string>): SagaIterator
   }
 }
 
+function* removeTracksFromPlaylistWorker(
+  action: PayloadAction<{ playlistId: string; trackUris: string[] }>
+): SagaIterator {
+  try {
+    const token: string = yield select(selectAccessToken);
+    const { playlistId, trackUris } = action.payload;
+
+    const tracksToRemove = trackUris.map((uri) => ({ uri }));
+
+    yield call(() =>
+      axios.request({
+        url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+        method: "delete",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        data: { tracks: tracksToRemove }
+      })
+    );
+
+    yield put(removeTracksFromPlaylistSuccess());
+
+    yield put(getSinglePlaylist(playlistId));
+  } catch (error: any) {
+    console.error("Error removing tracks:", error.message);
+    yield put(removeTracksFromPlaylistError({ message: error.message }));
+  }
+}
+
 export default function* playlistSaga() {
   yield takeLatest(getPersonalPlaylists.type, fetchPersonalWorker);
   yield takeLatest(createSpotifyPlaylist.type, createSpotifyPlaylistWorker);
   yield takeLatest(getSinglePlaylist.type, fetchSinglePlaylistWorker);
   yield takeLatest(addTracksToPlaylists.type, addTracksToPlaylistsWorker);
+  yield takeLatest(removeTracksFromPlaylist.type, removeTracksFromPlaylistWorker);
 }

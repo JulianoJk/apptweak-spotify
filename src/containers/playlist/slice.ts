@@ -36,6 +36,7 @@ const initialState: PlaylistState = {
   playlistSelectorModal: false,
   status: RequestStatus.IDLE
 };
+
 export const getPersonalPlaylists = createAction("spotify/fetchpersonalPlaylists");
 export const getPersonalPlaylistsSuccess = createAction<IPersonalPlaylist[]>(
   "spotify/fetchpersonalPlaylistsSuccess"
@@ -51,14 +52,27 @@ export const createSpotifyPlaylistSuccess = createAction("spotify/createSpotifyP
 export const createSpotifyPlaylistError = createAction<ErrorPayload>(
   "spotify/createSpotifyPlaylistError"
 );
+
 export const getSinglePlaylist = createAction<string>("spotify/fetchSinglePlaylist");
 export const getSinglePlaylistSuccess = createAction<IPersonalPlaylist>(
   "spotify/fetchSinglePlaylistSuccess"
 );
+
 export const addTracksToPlaylists = createAction<{
   playlistIds: string[];
   trackUris: string[];
 }>("spotify/addTracksToPlaylists");
+
+export const removeTracksFromPlaylist = createAction<{
+  playlistId: string;
+  trackUris: string[];
+}>("spotify/removeTracksFromPlaylist");
+export const removeTracksFromPlaylistSuccess = createAction(
+  "spotify/removeTracksFromPlaylistSuccess"
+);
+export const removeTracksFromPlaylistError = createAction<ErrorPayload>(
+  "spotify/removeTracksFromPlaylistError"
+);
 
 const playlistSlice = createSlice({
   name: "userPlaylists",
@@ -125,6 +139,7 @@ const playlistSlice = createSlice({
         state.status = RequestStatus.ERROR;
         state.error = action.payload.message;
       })
+
       .addCase(createSpotifyPlaylistSuccess, (state) => {
         state.status = RequestStatus.SUCCESS;
       })
@@ -133,10 +148,27 @@ const playlistSlice = createSlice({
         state.error = action.payload.message;
       })
       .addCase(getSinglePlaylistSuccess, (state, action) => {
-        const exists = state.personalPlaylists.find((p) => p.id === action.payload.id);
-        if (!exists) {
+        const index = state.personalPlaylists.findIndex((p) => p.id === action.payload.id);
+        if (index !== -1) {
+          state.personalPlaylists[index] = action.payload;
+        } else {
           state.personalPlaylists.push(action.payload);
         }
+      })
+      .addCase(removeTracksFromPlaylistSuccess, (state) => {
+        state.status = RequestStatus.SUCCESS;
+      })
+      .addCase(removeTracksFromPlaylistError, (state, action) => {
+        state.status = RequestStatus.ERROR;
+        state.error = action.payload.message;
+      })
+      .addCase(addTracksToPlaylists, (state) => {
+        state.status = RequestStatus.PENDING;
+        state.error = undefined;
+      })
+      .addCase(removeTracksFromPlaylist, (state) => {
+        state.status = RequestStatus.PENDING;
+        state.error = undefined;
       });
   }
 });
