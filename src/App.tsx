@@ -10,6 +10,7 @@ import { Route, Routes, BrowserRouter as Router } from "react-router";
 import PlaylistList from "./components/playlist/playlistList/PlaylistList.component";
 import TrackList from "./components/tracks/TrackList.component";
 import PlaylistDetails from "./components/playlist/playlistDetails/PlaylistDetails.component";
+import { Notifications } from "@mantine/notifications";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
@@ -20,6 +21,8 @@ const App: FC = (): ReactElement => {
     <Router>
       <MantineProvider stylesTransform={emotionTransform} defaultColorScheme="dark">
         <MantineEmotionProvider>
+          <Notifications />
+
           <AppShell padding="md">
             <AppShell.Header>
               <Header />

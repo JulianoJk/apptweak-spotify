@@ -7,7 +7,8 @@ import {
   Table,
   Text,
   Tooltip,
-  ActionIcon
+  ActionIcon,
+  useMantineColorScheme
 } from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -24,6 +25,7 @@ const TrackList = () => {
   const dispatch = useDispatch();
   const { query } = useParams<{ query: string }>();
   const { tracks, status, error } = useSelector((state: RootState) => state.spotifyTracks);
+  const { colorScheme } = useMantineColorScheme();
 
   const [sortedData, setSortedData] = useState(tracks);
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
@@ -59,7 +61,12 @@ const TrackList = () => {
   const rows = sortedData.map((track) => {
     const selected = selectedTracks.includes(track.id);
     return (
-      <Table.Tr key={track.id} style={{ backgroundColor: selected ? "#2c2e33" : "inherit" }}>
+      <Table.Tr
+        key={track.id}
+        sx={{
+          backgroundColor: selected ? (colorScheme === "dark" ? "#2c2e33" : "#F8F9FA") : "inherit"
+        }}
+      >
         <Table.Td>
           <Checkbox checked={selected} onChange={() => toggleRow(track.id)} />
         </Table.Td>

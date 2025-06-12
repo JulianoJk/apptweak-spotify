@@ -52,8 +52,6 @@ const TrackSearchSelect = ({
     (option) => !searchSelection.includes(option.value)
   );
 
-  console.log(visibleOptions);
-
   return (
     <MultiSelect
       sx={{ maxWidth: "30em" }}

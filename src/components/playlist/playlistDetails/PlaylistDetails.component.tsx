@@ -18,6 +18,8 @@ import { getSinglePlaylist } from "../../../containers/playlist/slice";
 import { RequestStatus } from "../../../types/requests";
 import { addTracksToPlaylists } from "../../../containers/tracks/slice";
 import TrackSearchSelect from "./TrackSearchSelect.component";
+import { showNotification } from "@mantine/notifications";
+import { notificationAlert } from "../../ui/NotificationAlert";
 
 const PlaylistDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,14 +55,30 @@ const PlaylistDetails = () => {
     }
   };
 
-  const handleAddTracks = () => {
+  const handleAddTracks = async () => {
     if (!id || searchSelection.length === 0) return;
 
     const uris = searchSelection.map((trackId) => `spotify:track:${trackId}`);
 
-    dispatch(addTracksToPlaylists({ playlistIds: [id], trackUris: uris }));
-    dispatch(getSinglePlaylist(id));
-    setSearchSelection([]);
+    try {
+      dispatch(addTracksToPlaylists({ playlistIds: [id], trackUris: uris }));
+      dispatch(getSinglePlaylist(id));
+      setSearchSelection([]);
+
+      notificationAlert({
+        title: "Track(s) added",
+        message: "Track(s) were successfully added to your playlist.",
+        iconColor: "green",
+        closeAfter: 5000
+      });
+    } catch (error: any) {
+      notificationAlert({
+        title: "Failed to add track(s)",
+        message: error.message || "Something went wrong. Please try again.",
+        iconColor: "red",
+        closeAfter: 5000
+      });
+    }
   };
 
   if (!playlist) return <Text px="xl">Playlist not found.</Text>;
