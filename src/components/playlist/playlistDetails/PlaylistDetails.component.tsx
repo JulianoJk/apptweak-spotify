@@ -25,6 +25,8 @@ const PlaylistDetails = () => {
 
   const { personalPlaylists } = useSelector((state: RootState) => state.playlistSlice);
   const { status } = useSelector((state: RootState) => state.spotifyTracks);
+  const user = useSelector((state: RootState) => state.authentication.user);
+
   const playlist = personalPlaylists.find((p) => p.id === id);
 
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
@@ -63,6 +65,8 @@ const PlaylistDetails = () => {
 
   if (!playlist) return <Text px="xl">Playlist not found.</Text>;
 
+  const canEdit = user?.userId === playlist.owner.id || playlist.collaborative === true;
+
   return (
     <>
       <Box
@@ -93,20 +97,23 @@ const PlaylistDetails = () => {
       </Box>
 
       <Box p="md">
-        <Group align="flex-end" mb="md">
-          <TrackSearchSelect
-            searchSelection={searchSelection}
-            setSearchSelection={setSearchSelection}
-            playlistTrackIds={playlist.tracks.map((t) => t.id)}
-          />
+        {canEdit && (
+          <Group align="flex-end" mb="md">
+            <TrackSearchSelect
+              searchSelection={searchSelection}
+              setSearchSelection={setSearchSelection}
+              playlistTrackIds={playlist.tracks.map((t) => t.id)}
+            />
+            <Button onClick={handleAddTracks} loading={status === RequestStatus.PENDING} size="sm">
+              Add
+            </Button>
+          </Group>
+        )}
 
-          <Button onClick={handleAddTracks} loading={status === RequestStatus.PENDING} size="sm">
-            Add
-          </Button>
-        </Group>
         {playlist.tracks.length <= 0 ? (
           <Text c="dimmed" size="xl" ta="center">
-            No tracks available in this playlist. You can add tracks using the search bar above.
+            No tracks available in this playlist.
+            {canEdit ? "You can add tracks using the search bar above." : ""}
           </Text>
         ) : (
           <Table verticalSpacing="sm">

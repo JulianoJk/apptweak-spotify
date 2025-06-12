@@ -14,8 +14,9 @@ export interface IPersonalPlaylist {
   image: string;
   description?: string;
   spotifyUrl: string;
-  owner: { display_name: string };
+  owner: { display_name: string; id: string };
   tracks: ITrack[];
+  collaborative?: boolean;
 }
 interface PlaylistState {
   playlists: IUserPlaylist[];
