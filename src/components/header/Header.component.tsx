@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Box, Button, Card, Group, Input, rem } from "@mantine/core";
+import { Box, Button, Card, Group, Input } from "@mantine/core";
 import { useStyles } from "./Header.styles";
 import ToggleColorMode from "../ui/ToggleColorMode.component";
 import { openCreateModal } from "../../containers/playlist/slice";
 import PlaylistModal from "../playlist/playlistModal/PlaylistModal.component";
 import { useNavigate } from "react-router";
 import { fetchTracks } from "../../containers/tracks/slice";
-import { IconLibraryPlus, IconPlus, IconSearch } from "@tabler/icons-react";
+import { IconLibraryPlus, IconSearch } from "@tabler/icons-react";
 
 export default function Header() {
   const [searchValue, setSearchValue] = useState("");

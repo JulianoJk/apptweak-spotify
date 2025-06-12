@@ -1,4 +1,4 @@
-import { MultiSelect, Loader, Avatar, Group, Text, Tooltip, Box, Divider } from "@mantine/core";
+import { MultiSelect, Loader, Avatar, Group, Text, Tooltip, Box } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
