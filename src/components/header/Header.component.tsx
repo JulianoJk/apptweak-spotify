@@ -1,84 +1,60 @@
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { Box, Button, Card, Group, Input, rem } from "@mantine/core";
-import { useStyles } from "./Header.styles";
 import ToggleColorMode from "../ui/ToggleColorMode.component";
-import { openCreateModal } from "../../containers/playlist/slice";
-import PlaylistModal from "../playlist/playlistModal/PlaylistModal.component";
-import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { fetchTracks } from "../../containers/tracks/slice";
-import { IconLibraryPlus, IconPlus, IconSearch } from "@tabler/icons-react";
+import { Button } from "@mui/material";
+import { useStyles } from "./Header.styles";
+import { useNavigate } from "react-router";
 
-export default function Header() {
-  const [searchValue, setSearchValue] = useState("");
+interface HeaderProps {
+  mode: "light" | "dark";
+  setMode: () => void;
+}
 
+export default function Header(props: HeaderProps) {
+  const [searchValue, setSearchValue] = useState<string>("");
+  const dispatch = useDispatch();
   const { classes } = useStyles();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
   const searchTracks = () => {
     dispatch(fetchTracks(searchValue));
-    navigate("/search/tracks/" + searchValue);
+    navigate("/search/tracks");
   };
-
-  const createPlaylist = () => {
-    dispatch(openCreateModal());
-  };
-
   return (
-    <>
-      <Card radius="md" className={classes.appBar}>
-        <Group className={classes.inner} p="apart">
-          <Group className={classes.navLinks} gap="md">
-            <Button
-              variant="subtle"
-              component="a"
-              onClick={() => navigate("/")}
-              style={{ cursor: "pointer" }}
-            >
-              Playlists
-            </Button>
-          </Group>
+    <AppBar position="static" elevation={1} className={classes.appBar}>
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Typography variant="h6" className={classes.title}>
+          Spotify Clone
+        </Typography>
 
-          <Group className={classes.leftSide} gap="sm">
-            <Input
-              leftSection={<IconSearch size={26} />}
-              id="search-track"
-              size="lg"
-              radius="lg"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === "Enter" && searchTracks()}
-              placeholder="Search for a track"
-              className={classes.textField}
-            />
+        <Box className={classes.searchSection}>
+          <TextField
+            id="standard-basic"
+            label="Search for a track"
+            className={classes.textField}
+            slotProps={{
+              input: {
+                style: {
+                  borderRadius: "3em"
+                }
+              }
+            }}
+            onChange={(event) => setSearchValue(event.target.value)}
+          />
+          <Button variant="outlined" className={classes.searchButton} onClick={searchTracks}>
+            Search
+          </Button>
+        </Box>
 
-            <Button
-              variant="filled"
-              onClick={searchTracks}
-              className={classes.searchButton}
-              disabled={!searchValue}
-            >
-              Search
-            </Button>
-          </Group>
-
-          <Group className={classes.rightSide} gap="sm">
-            <Button
-              variant="default"
-              onClick={createPlaylist}
-              className={classes.playlistButton}
-              rightSection={<IconLibraryPlus size={16} />}
-            >
-              Create new playlist
-            </Button>
-            <Box className={classes.toggleBox}>
-              <ToggleColorMode />
-            </Box>
-          </Group>
-        </Group>
-      </Card>
-      <PlaylistModal />
-    </>
+        <Box className={classes.toggleBox}>
+          <ToggleColorMode {...props} />
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }

@@ -1,4 +1,4 @@
-import { call, put, select, takeLatest } from "redux-saga/effects";
+import { call, put, takeEvery, select } from "redux-saga/effects";
 import axios from "axios";
 import { SagaIterator } from "redux-saga";
 import { fetchTracks, getTracksError, getTrackSuccess, ITrack } from "./slice";
@@ -19,7 +19,7 @@ function* fetchTracksWorker(action: PayloadAction<string>): SagaIterator {
         params: {
           q: query,
           type: "track",
-          limit: 15
+          limit: 10
         }
       })
     );
@@ -41,6 +41,7 @@ function* fetchTracksWorker(action: PayloadAction<string>): SagaIterator {
     yield put(getTracksError({ message: error.message }));
   }
 }
-export default function* trackSaga() {
-  yield takeLatest(fetchTracks.type, fetchTracksWorker);
+
+export default function* tracksSaga() {
+  yield takeEvery(fetchTracks.type, fetchTracksWorker);
 }
