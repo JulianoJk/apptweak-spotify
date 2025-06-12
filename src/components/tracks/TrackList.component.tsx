@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Avatar,
-  Checkbox,
-  Group,
-  ScrollArea,
-  Table,
-  Text,
-  Tooltip,
-  ActionIcon,
-  useMantineColorScheme
-} from "@mantine/core";
+import { Checkbox, ScrollArea, Table, Tooltip, ActionIcon } from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useParams } from "react-router";
@@ -20,14 +10,13 @@ import ErrorMessage from "../ui/ErrorMessage.component";
 import { IconPlaylistAdd } from "@tabler/icons-react";
 import TrackToPlaylist from "../playlist/trackToPlaylistModal/TrackToPlaylistModal.component";
 import { openPlaylistSelectModal } from "../../containers/playlist/slice";
+import TrackTableRow from "./TrackTableRow.component";
 
 const TrackList = () => {
   const dispatch = useDispatch();
   const { query } = useParams<{ query: string }>();
   const { tracks, status, error } = useSelector((state: RootState) => state.spotifyTracks);
-  const { colorScheme } = useMantineColorScheme();
 
-  const [sortedData, setSortedData] = useState(tracks);
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
 
   useEffect(() => {
@@ -35,10 +24,6 @@ const TrackList = () => {
       dispatch(fetchTracks(query));
     }
   }, [dispatch, query, tracks.length, status]);
-
-  useEffect(() => {
-    setSortedData(tracks);
-  }, [tracks]);
 
   const toggleRow = (id: string) =>
     setSelectedTracks((current) =>
@@ -50,44 +35,9 @@ const TrackList = () => {
       current.length === tracks.length ? [] : tracks.map((t) => t.id)
     );
 
-  const handleOpenPlaylistModal = () => {
-    dispatch(openPlaylistSelectModal());
-  };
-
   if (status === RequestStatus.PENDING) return <LoadingIndicator />;
   if (status === RequestStatus.ERROR)
     return <ErrorMessage message={error || "Something went wrong"} />;
-
-  const rows = sortedData.map((track) => {
-    const selected = selectedTracks.includes(track.id);
-    return (
-      <Table.Tr
-        key={track.id}
-        sx={{
-          backgroundColor: selected ? (colorScheme === "dark" ? "#2c2e33" : "#F8F9FA") : "inherit"
-        }}
-      >
-        <Table.Td>
-          <Checkbox checked={selected} onChange={() => toggleRow(track.id)} />
-        </Table.Td>
-        <Table.Td>
-          <Group gap="sm">
-            <Avatar size={76} src={track.albumImage} radius="sm" />
-            <div>
-              <Text size="sm" fw={500}>
-                {track.name}
-              </Text>
-              <Text size="xs" c="dimmed">
-                {track.artist}
-              </Text>
-            </div>
-          </Group>
-        </Table.Td>
-        <Table.Td>{track.album}</Table.Td>
-        <Table.Td>{track.albumReleaseDate}</Table.Td>
-      </Table.Tr>
-    );
-  });
 
   return (
     <ScrollArea>
@@ -101,27 +51,38 @@ const TrackList = () => {
                 indeterminate={selectedTracks.length > 0 && selectedTracks.length !== tracks.length}
               />
             </Table.Th>
+            <Table.Th>#</Table.Th>
             <Table.Th>Track</Table.Th>
             <Table.Th>Album</Table.Th>
             <Table.Th>Release Date</Table.Th>
             <Table.Th w={60}>
-              {selectedTracks.length > 0 ? (
+              {selectedTracks.length > 0 && (
                 <Tooltip label="Add selected to playlist" withArrow>
                   <ActionIcon
                     variant="filled"
-                    onClick={handleOpenPlaylistModal}
+                    onClick={() => dispatch(openPlaylistSelectModal())}
                     color="blue"
                     aria-label="Add to Playlist"
                   >
                     <IconPlaylistAdd style={{ width: "70%", height: "70%" }} stroke={1.5} />
                   </ActionIcon>
                 </Tooltip>
-              ) : null}
+              )}
             </Table.Th>
           </Table.Tr>
         </Table.Thead>
 
-        <Table.Tbody>{rows}</Table.Tbody>
+        <Table.Tbody>
+          {tracks.map((track, index) => (
+            <TrackTableRow
+              key={track.id}
+              track={track}
+              index={index}
+              isSelected={selectedTracks.includes(track.id)}
+              onToggle={toggleRow}
+            />
+          ))}
+        </Table.Tbody>
       </Table>
       <TrackToPlaylist selectedTrackIds={selectedTracks} />
     </ScrollArea>

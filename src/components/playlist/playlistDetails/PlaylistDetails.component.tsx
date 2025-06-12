@@ -18,8 +18,8 @@ import { getSinglePlaylist } from "../../../containers/playlist/slice";
 import { RequestStatus } from "../../../types/requests";
 import { addTracksToPlaylists } from "../../../containers/tracks/slice";
 import TrackSearchSelect from "./TrackSearchSelect.component";
-import { showNotification } from "@mantine/notifications";
 import { notificationAlert } from "../../ui/NotificationAlert";
+import TrackTableRow from "../../tracks/TrackTableRow.component";
 
 const PlaylistDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -131,7 +131,7 @@ const PlaylistDetails = () => {
         {playlist.tracks.length <= 0 ? (
           <Text c="dimmed" size="xl" ta="center">
             No tracks available in this playlist.
-            {canEdit ? "You can add tracks using the search bar above." : ""}
+            {canEdit ? " You can add tracks using the search bar above." : ""}
           </Text>
         ) : (
           <Table verticalSpacing="sm">
@@ -154,28 +154,13 @@ const PlaylistDetails = () => {
             </Table.Thead>
             <Table.Tbody>
               {playlist.tracks.map((track, index) => (
-                <Table.Tr key={`${track.id}-${index}`}>
-                  <Table.Td>
-                    <Checkbox
-                      checked={selectedTracks.includes(track.id)}
-                      onChange={() => toggleTrack(track.id)}
-                    />
-                  </Table.Td>
-                  <Table.Td>{index + 1}</Table.Td>
-                  <Table.Td>
-                    <Group>
-                      <Avatar src={track.albumImage} size={60} radius="sm" />
-                      <div>
-                        <Text fw={500}>{track.name}</Text>
-                        <Text size="xs" c="dimmed">
-                          {track.artist}
-                        </Text>
-                      </div>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>{track.album}</Table.Td>
-                  <Table.Td>{track.albumReleaseDate}</Table.Td>
-                </Table.Tr>
+                <TrackTableRow
+                  key={track.id}
+                  track={track}
+                  index={index}
+                  isSelected={selectedTracks.includes(track.id)}
+                  onToggle={toggleTrack}
+                />
               ))}
             </Table.Tbody>
           </Table>
