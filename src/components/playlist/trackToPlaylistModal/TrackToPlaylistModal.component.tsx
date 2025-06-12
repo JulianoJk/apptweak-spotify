@@ -13,27 +13,29 @@ import { useDispatch, useSelector } from "react-redux";
 import { addTracksToPlaylists, closePlaylistSelectModal } from "../../../containers/playlist/slice";
 import { RootState } from "../../../store/store";
 import { useEffect, useState } from "react";
-import { getPersonalPlaylists, IPersonalPlaylist } from "../../../containers/playlist/slice";
+import { getPersonalPlaylists } from "../../../containers/playlist/slice";
 import { useStyles } from "../playlistList/PlaylistList.styles";
 import { RequestStatus } from "../../../types/requests";
 
 interface ITrackToPlaylistModalProps {
   selectedTrackIds: string[];
 }
-const TrackToPlaylistModal = (props: ITrackToPlaylistModalProps) => {
+
+const TrackToPlaylistModal = ({ selectedTrackIds }: ITrackToPlaylistModalProps) => {
   const dispatch = useDispatch();
   const { playlistSelectorModal, personalPlaylists, status } = useSelector(
     (state: RootState) => state.playlistSlice
   );
+  const userId = useSelector((state: RootState) => state.authentication.user?.userId);
   const { classes } = useStyles({ disableHover: true });
-
   const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([]);
 
   useEffect(() => {
-    if (status === RequestStatus.IDLE && personalPlaylists.length === 0) {
+    if (status === RequestStatus.IDLE) {
       dispatch(getPersonalPlaylists());
     }
-  }, [dispatch, status, personalPlaylists.length]);
+  }, [dispatch, status]);
+
   const toggleSelection = (id: string) => {
     setSelectedPlaylists((prev) =>
       prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
@@ -46,8 +48,7 @@ const TrackToPlaylistModal = (props: ITrackToPlaylistModalProps) => {
   };
 
   const handleAdd = () => {
-    const trackUris = props.selectedTrackIds.map((id) => `spotify:track:${id}`);
-
+    const trackUris = selectedTrackIds.map((id) => `spotify:track:${id}`);
     dispatch(
       addTracksToPlaylists({
         playlistIds: selectedPlaylists,
@@ -56,6 +57,10 @@ const TrackToPlaylistModal = (props: ITrackToPlaylistModalProps) => {
     );
     handleClose();
   };
+
+  const editablePlaylists = personalPlaylists.filter(
+    (playlist) => playlist.owner.id === userId || playlist.collaborative === true
+  );
 
   return (
     <Modal
@@ -71,10 +76,9 @@ const TrackToPlaylistModal = (props: ITrackToPlaylistModalProps) => {
           Choose one or more playlists where you want to add the selected track(s).
         </Text>
         <Divider />
-
         <ScrollArea h="25em" scrollbars="y">
           <SimpleGrid spacing="md" cols={3}>
-            {personalPlaylists.map((playlist: IPersonalPlaylist) => {
+            {editablePlaylists.map((playlist) => {
               const isSelected = selectedPlaylists.includes(playlist.id);
               return (
                 <Box

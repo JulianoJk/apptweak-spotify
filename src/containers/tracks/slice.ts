@@ -1,4 +1,4 @@
-import { createSlice, createAction } from "@reduxjs/toolkit";
+import { createSlice, createAction, PayloadAction } from "@reduxjs/toolkit";
 import { ErrorPayload, RequestStatus } from "../../types/requests";
 
 export interface ITrack {
@@ -26,11 +26,16 @@ export const fetchTracks = createAction<string>("spotify/fetchTracks");
 export const getTracksError = createAction<ErrorPayload>("spotify/setTracksError");
 export const getTrackSuccess = createAction<ITrack[]>("spotify/setTrackSuccess");
 
+export const addTracksToPlaylists = createAction<{
+  playlistIds: string[];
+  trackUris: string[];
+}>("spotify/addTracksToPlaylists");
+
 const tracksSlice = createSlice({
   name: "spotifyTracks",
   initialState,
   reducers: {
-    setTracks(state, action) {
+    setTracks(state, action: PayloadAction<ITrack[]>) {
       state.tracks = action.payload;
     }
   },
@@ -38,6 +43,7 @@ const tracksSlice = createSlice({
     builder
       .addCase(fetchTracks, (state) => {
         state.status = RequestStatus.PENDING;
+        state.error = undefined;
       })
       .addCase(getTrackSuccess, (state, action) => {
         state.status = RequestStatus.SUCCESS;

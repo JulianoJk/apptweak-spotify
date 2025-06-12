@@ -23,10 +23,10 @@ const PlaylistList = ({ context = "page" }: PlaylistListProps) => {
   );
 
   useEffect(() => {
-    if (status === RequestStatus.IDLE && personalPlaylists.length === 0) {
+    if (status === RequestStatus.IDLE) {
       dispatch(getPersonalPlaylists());
     }
-  }, [dispatch, status, personalPlaylists.length]);
+  }, [dispatch, status]);
 
   const handleCardClick = (id: string) => {
     if (context === "page") {
@@ -56,8 +56,7 @@ const PlaylistList = ({ context = "page" }: PlaylistListProps) => {
             style={{ cursor: "pointer" }}
           >
             <Image
-              src={playlist.image}
-              fallbackSrc="https://placehold.co/600x400?text=No+Image"
+              src={playlist.image || "https://placehold.co/600x400?text=No+Image"}
               radius="md"
               className={classes.image}
               height={context === "page" ? 160 : 100}
