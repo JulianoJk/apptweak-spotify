@@ -1,47 +1,91 @@
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import { useSelector } from "react-redux";
-import { Card, CardContent, Box, Typography } from "@mui/material";
-import { ITrack } from "../../containers/tracks/slice";
+import { useEffect, useState } from "react";
+import { Checkbox, ScrollArea, Table, Tooltip, ActionIcon } from "@mantine/core";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { useStyles } from "./TrackList.styles";
+import { useParams } from "react-router";
+import { fetchTracks } from "../../containers/tracks/slice";
+import { RequestStatus } from "../../types/requests";
+import LoadingIndicator from "../ui/LoadingIndicator.component";
+import ErrorMessage from "../ui/ErrorMessage.component";
+import { IconPlaylistAdd } from "@tabler/icons-react";
+import TrackToPlaylist from "../playlist/trackToPlaylistModal/TrackToPlaylistModal.component";
+import { openPlaylistSelectModal } from "../../containers/playlist/slice";
+import TrackTableRow from "./TrackTableRow.component";
 
 const TrackList = () => {
-  const tracks = useSelector((state: RootState) => state.spotifyTracks.tracks);
-  const { classes } = useStyles();
+  const dispatch = useDispatch();
+  const { query } = useParams<{ query: string }>();
+  const { tracks, status, error } = useSelector((state: RootState) => state.spotifyTracks);
+
+  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (query && tracks.length === 0 && status === RequestStatus.IDLE) {
+      dispatch(fetchTracks(query));
+    }
+  }, [dispatch, query, tracks.length, status]);
+
+  const toggleRow = (id: string) =>
+    setSelectedTracks((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+    );
+
+  const toggleAll = () =>
+    setSelectedTracks((current) =>
+      current.length === tracks.length ? [] : tracks.map((t) => t.id)
+    );
+
+  if (status === RequestStatus.PENDING) return <LoadingIndicator />;
+  if (status === RequestStatus.ERROR)
+    return <ErrorMessage message={error || "Something went wrong"} />;
 
   return (
-    <List className={classes.listRoot}>
-      {tracks.map((track: ITrack) => (
-        <Card key={track.id} className={classes.cardContainer}>
-          <CardContent>
-            <ListItem className={classes.listItem}>
-              <ListItemAvatar>
-                <img src={track.albumImage} alt={track.name} className={classes.coverImage} />
-              </ListItemAvatar>
+    <ScrollArea>
+      <Table miw={800} verticalSpacing="sm">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th w={40}>
+              <Checkbox
+                onChange={toggleAll}
+                checked={selectedTracks.length === tracks.length}
+                indeterminate={selectedTracks.length > 0 && selectedTracks.length !== tracks.length}
+              />
+            </Table.Th>
+            <Table.Th>#</Table.Th>
+            <Table.Th>Track</Table.Th>
+            <Table.Th>Album</Table.Th>
+            <Table.Th>Release Date</Table.Th>
+            <Table.Th w={60}>
+              {selectedTracks.length > 0 && (
+                <Tooltip label="Add selected to playlist" withArrow>
+                  <ActionIcon
+                    variant="filled"
+                    onClick={() => dispatch(openPlaylistSelectModal())}
+                    color="blue"
+                    aria-label="Add to Playlist"
+                  >
+                    <IconPlaylistAdd style={{ width: "70%", height: "70%" }} stroke={1.5} />
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </Table.Th>
+          </Table.Tr>
+        </Table.Thead>
 
-              <Box className={classes.textBox}>
-                <Typography fontWeight="bold">{track.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {track.artist}
-                </Typography>
-              </Box>
-
-              <Box className={classes.infoBox}>
-                <Typography className={classes.label}>Album</Typography>
-                <Typography>{track.album}</Typography>
-              </Box>
-
-              <Box className={classes.infoBox}>
-                <Typography className={classes.label}>Release Date</Typography>
-                <Typography>{track.albumReleaseDate}</Typography>
-              </Box>
-            </ListItem>
-          </CardContent>
-        </Card>
-      ))}
-    </List>
+        <Table.Tbody>
+          {tracks.map((track, index) => (
+            <TrackTableRow
+              key={track.id}
+              track={track}
+              index={index}
+              isSelected={selectedTracks.includes(track.id)}
+              onToggle={toggleRow}
+            />
+          ))}
+        </Table.Tbody>
+      </Table>
+      <TrackToPlaylist selectedTrackIds={selectedTracks} />
+    </ScrollArea>
   );
 };
 

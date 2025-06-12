@@ -1,29 +1,21 @@
-import { IconButton, PaletteMode } from "@mui/material";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { ActionIcon, useMantineColorScheme } from "@mantine/core";
+import { IconSun, IconMoon } from "@tabler/icons-react";
+const ToggleColorMode = () => {
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
 
-interface ToggleColorModeProps {
-  mode: PaletteMode;
-  setMode: () => void;
-}
-
-const ToggleColorMode = ({ mode, setMode }: ToggleColorModeProps) => {
-  const isDark = mode === "dark";
-
+  const toggleColorScheme = () => {
+    setColorScheme(colorScheme === "dark" ? "light" : "dark");
+  };
   return (
-    <IconButton
-      onClick={setMode}
-      size="small"
-      color="inherit"
-      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+    <ActionIcon
+      onClick={() => toggleColorScheme()}
+      size="xl"
+      variant="outline"
+      color={colorScheme === "dark" ? "yellow" : "#0c8599"}
+      aria-label="Toggle color scheme"
     >
-      {isDark ? (
-        <LightModeIcon fontSize="medium" sx={{ color: "#FFD700" }} />
-      ) : (
-        <DarkModeIcon fontSize="medium" sx={{ color: "#151515" }} />
-      )}
-    </IconButton>
+      {colorScheme === "dark" ? <IconSun stroke={1.5} /> : <IconMoon stroke={2} />}
+    </ActionIcon>
   );
 };
-
 export default ToggleColorMode;
