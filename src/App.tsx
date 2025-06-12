@@ -34,7 +34,6 @@ const App: FC = (): ReactElement => {
                 <Route path="/playlist/:id" element={<PlaylistDetails />} />
                 <Route path="/search/tracks/:query" element={<TrackList />} />
                 <Route path="/*" element={<h1>test route</h1>} />
-                {/* <Route path="/playlist/:id" element={<PlaylistList />} /> */}
               </Routes>
             </AppShell.Main>
           </AppShell>

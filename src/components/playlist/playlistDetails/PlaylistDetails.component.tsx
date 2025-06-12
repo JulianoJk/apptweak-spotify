@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { RootState } from "../../../store/store";
-import { getSinglePlaylist } from "../../../containers/playlist/slice";
+import { getSinglePlaylist, removeTracksFromPlaylist } from "../../../containers/playlist/slice";
 import { RequestStatus } from "../../../types/requests";
 import { addTracksToPlaylists } from "../../../containers/tracks/slice";
 import TrackSearchSelect from "./TrackSearchSelect.component";
@@ -39,8 +39,8 @@ const PlaylistDetails = () => {
 
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
   const [searchSelection, setSearchSelection] = useState<string[]>([]);
-
   const [wasActionFired, setWasActionFired] = useState(false);
+  const [wasRemoveFired, setWasRemoveFired] = useState(false);
 
   useEffect(() => {
     if (!playlist && id && trackStatus !== RequestStatus.PENDING) {
@@ -69,15 +69,21 @@ const PlaylistDetails = () => {
     const uris = searchSelection.map((trackId) => `spotify:track:${trackId}`);
 
     dispatch(addTracksToPlaylists({ playlistIds: [id], trackUris: uris }));
-    dispatch(getSinglePlaylist(id));
     setWasActionFired(true);
     setSearchSelection([]);
   };
 
-  useEffect(() => {
-    if (!wasActionFired) return;
+  const handleRemoveTracks = () => {
+    if (!id || selectedTracks.length === 0) return;
 
-    if (playlistStatus === RequestStatus.SUCCESS) {
+    const uris = selectedTracks.map((trackId) => `spotify:track:${trackId}`);
+    dispatch(removeTracksFromPlaylist({ playlistId: id, trackUris: uris }));
+    setWasRemoveFired(true);
+    setSelectedTracks([]);
+  };
+
+  useEffect(() => {
+    if (wasActionFired && playlistStatus === RequestStatus.SUCCESS) {
       notificationAlert({
         title: "Track(s) added",
         message: "Track(s) were successfully added to your playlist.",
@@ -87,16 +93,27 @@ const PlaylistDetails = () => {
       setWasActionFired(false);
     }
 
-    if (playlistStatus === RequestStatus.ERROR) {
+    if (wasRemoveFired && playlistStatus === RequestStatus.SUCCESS) {
       notificationAlert({
-        title: "Failed to add track(s)",
+        title: "Track(s) removed",
+        message: "Track(s) were successfully removed from your playlist.",
+        iconColor: "green",
+        closeAfter: 5000
+      });
+      setWasRemoveFired(false);
+    }
+
+    if ((wasActionFired || wasRemoveFired) && playlistStatus === RequestStatus.ERROR) {
+      notificationAlert({
+        title: "Failed to update playlist",
         message: error || "Something went wrong. Please try again.",
         iconColor: "red",
         closeAfter: 5000
       });
       setWasActionFired(false);
+      setWasRemoveFired(false);
     }
-  }, [playlistStatus, error, wasActionFired]);
+  }, [playlistStatus, error, wasActionFired, wasRemoveFired]);
 
   if (!playlist) return <Text px="xl">Playlist not found.</Text>;
 
@@ -149,6 +166,15 @@ const PlaylistDetails = () => {
             >
               Add
             </Button>
+            <Button
+              variant="outline"
+              color="red"
+              disabled={selectedTracks.length === 0}
+              onClick={handleRemoveTracks}
+              size="sm"
+            >
+              Remove
+            </Button>
           </Group>
         )}
 
@@ -182,7 +208,7 @@ const PlaylistDetails = () => {
             <Table.Tbody>
               {playlist.tracks.map((track, index) => (
                 <TrackTableRow
-                  key={track.id}
+                  key={`${track.id}-${index}`}
                   track={track}
                   index={index}
                   isSelected={selectedTracks.includes(track.id)}
