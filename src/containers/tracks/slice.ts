@@ -1,4 +1,4 @@
-import { createSlice, createAction, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAction } from "@reduxjs/toolkit";
 import { ErrorPayload, RequestStatus } from "../../types/requests";
 
 export interface ITrack {
@@ -10,32 +10,41 @@ export interface ITrack {
   spotifyUrl: string;
   albumReleaseDate: string;
 }
+export interface IRandomPlaylist {
+  id: string;
+  name: string;
+  image: string;
+  description?: string;
+  spotifyUrl: string;
+}
 
 interface TracksState {
   tracks: ITrack[];
+  randomPlaylists?: IRandomPlaylist[];
   status: RequestStatus;
   error?: string;
 }
 
 const initialState: TracksState = {
   tracks: [],
+  randomPlaylists: [],
   status: RequestStatus.IDLE
 };
 
 export const fetchTracks = createAction<string>("spotify/fetchTracks");
 export const getTracksError = createAction<ErrorPayload>("spotify/setTracksError");
 export const getTrackSuccess = createAction<ITrack[]>("spotify/setTrackSuccess");
-
-export const addTracksToPlaylists = createAction<{
-  playlistIds: string[];
-  trackUris: string[];
-}>("spotify/addTracksToPlaylists");
+export const fetchHomePlaylists = createAction("spotify/fetchHomePlaylists");
+export const getHomePlaylistsSuccess = createAction<IRandomPlaylist[]>(
+  "spotify/setHomePlaylistsSuccess"
+);
+export const getHomePlaylistsError = createAction<ErrorPayload>("spotify/setHomePlaylistsError");
 
 const tracksSlice = createSlice({
   name: "spotifyTracks",
   initialState,
   reducers: {
-    setTracks(state, action: PayloadAction<ITrack[]>) {
+    setTracks(state, action) {
       state.tracks = action.payload;
     }
   },
@@ -43,13 +52,19 @@ const tracksSlice = createSlice({
     builder
       .addCase(fetchTracks, (state) => {
         state.status = RequestStatus.PENDING;
-        state.error = undefined;
       })
       .addCase(getTrackSuccess, (state, action) => {
         state.status = RequestStatus.SUCCESS;
         state.tracks = action.payload;
       })
-      .addCase(getTracksError, (state, action) => {
+      .addCase(fetchHomePlaylists, (state) => {
+        state.status = RequestStatus.PENDING;
+      })
+      .addCase(getHomePlaylistsSuccess, (state, action) => {
+        state.status = RequestStatus.SUCCESS;
+        state.randomPlaylists = action.payload;
+      })
+      .addCase(getHomePlaylistsError, (state, action) => {
         state.status = RequestStatus.ERROR;
         state.error = action.payload.message;
       });

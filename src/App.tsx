@@ -1,46 +1,37 @@
 import "./App.css";
-import { FC, ReactElement } from "react";
+import { FC, ReactElement, useState } from "react";
 import { useSelector } from "react-redux";
-import "@mantine/core/styles.css";
-import { AppShell, MantineProvider } from "@mantine/core";
-import { MantineEmotionProvider, emotionTransform } from "@mantine/emotion";
+import { HashRouter as Router, Routes, Route } from "react-router";
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+
 import { selectUser } from "./containers/auth/selectors";
 import Header from "./components/header/Header.component";
-import { Route, Routes, BrowserRouter as Router } from "react-router";
-import PlaylistList from "./components/playlist/playlistList/PlaylistList.component";
 import TrackList from "./components/tracks/TrackList.component";
-import PlaylistDetails from "./components/playlist/playlistDetails/PlaylistDetails.component";
-import { Notifications } from "@mantine/notifications";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
   // TODO: You can access user data and now fetch user's playlists
   console.log(user);
 
-  return (
-    <Router>
-      <MantineProvider stylesTransform={emotionTransform} defaultColorScheme="dark">
-        <MantineEmotionProvider>
-          <Notifications />
+  const [mode, setMode] = useState<"light" | "dark">("dark");
 
-          <AppShell padding="md">
-            <AppShell.Header>
-              <Header />
-            </AppShell.Header>
-            <AppShell.Main style={{ marginTop: "6rem" }}>
-              <Routes>
-                <Route path="/" element={<PlaylistList />} />
-                <Route path="/playlists" element={<PlaylistList />} />
-                <Route path="/playlist/:id" element={<PlaylistDetails />} />
-                <Route path="/search/tracks/:query" element={<TrackList />} />
-                <Route path="/*" element={<h1>test route</h1>} />
-                {/* <Route path="/playlist/:id" element={<PlaylistList />} /> */}
-              </Routes>
-            </AppShell.Main>
-          </AppShell>
-        </MantineEmotionProvider>
-      </MantineProvider>
-    </Router>
+  const toggleMode = () => setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+
+  const theme = createTheme({ palette: { mode } });
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Header mode={mode} setMode={toggleMode} />
+        <Routes>
+          <Route path="/" element={<h1>Home route</h1>} />
+          <Route path="/search/tracks" element={<TrackList />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 };
 

@@ -1,68 +1,36 @@
-import { rem } from "@mantine/core";
-import { createStyles } from "@mantine/emotion";
+import { makeStyles } from "tss-react/mui";
 
-export const useStyles = createStyles((theme) => ({
+export const useStyles = makeStyles()((theme) => ({
   appBar: {
-    padding: `0 ${theme.spacing.md}`,
-    display: "flex",
-    alignItems: "center"
+    backgroundColor: theme.palette.background.default,
+    color: theme.palette.text.primary,
+    padding: theme.spacing(1, 2)
   },
-  inner: {
-    height: rem(96),
+  title: {
+    flexShrink: 0,
+    fontWeight: theme.typography.fontWeightBold
+  },
+  searchSection: {
+    width: "30em",
+    marginInline: theme.spacing(4),
     display: "flex",
-    justifyContent: "space-between",
+    gap: theme.spacing(1),
     alignItems: "center",
+    justifyContent: "flex-start"
+  },
+  textField: {
     width: "100%"
   },
-  toolbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    height: rem(56)
-  },
-
-  navLinks: {
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing.md
-  },
-
-  leftSide: {
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing.md,
-    flexGrow: 1,
-    maxWidth: rem(600)
-  },
-
-  rightSide: {
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing.md
-  },
-
-  textField: {
-    flexGrow: 1
-  },
-
   searchButton: {
-    height: rem(40),
-    borderRadius: rem(8),
-    fontWeight: 500,
-    paddingInline: theme.spacing.md
-  },
-
-  playlistButton: {
-    height: rem(40),
-    borderRadius: rem(8),
+    height: "2.5em",
+    borderRadius: "3em",
     textTransform: "none",
     fontWeight: 500,
-    paddingInline: theme.spacing.md
+    paddingInline: theme.spacing(2),
+    borderColor: theme.palette.divider,
+    color: theme.palette.text.primary
   },
-
   toggleBox: {
-    display: "flex",
-    alignItems: "center"
+    flexShrink: 0
   }
 }));

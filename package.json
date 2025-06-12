@@ -5,12 +5,9 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mantine/core": "^8.1.0",
-    "@mantine/emotion": "^8.1.0",
-    "@mantine/hooks": "^8.1.0",
-    "@mantine/notifications": "^8.1.0",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
     "@reduxjs/toolkit": "^1.9.7",
-    "@tabler/icons-react": "^3.34.0",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.5.1",
@@ -25,6 +22,7 @@
     "react-router": "^7.6.2",
     "react-scripts": "5.0.1",
     "redux-saga": "^1.2.3",
+    "tss-react": "^4.9.18",
     "typescript": "5.2.2",
     "web-vitals": "^3.5.0"
   },
