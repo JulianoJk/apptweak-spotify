@@ -10,12 +10,16 @@ import {
   Divider
 } from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
-import { addTracksToPlaylists, closePlaylistSelectModal } from "../../../containers/playlist/slice";
+import {
+  addTracksToPlaylists,
+  closePlaylistSelectModal,
+  getPersonalPlaylists
+} from "../../../containers/playlist/slice";
 import { RootState } from "../../../store/store";
 import { useEffect, useState } from "react";
-import { getPersonalPlaylists } from "../../../containers/playlist/slice";
 import { useStyles } from "../playlistList/PlaylistList.styles";
 import { RequestStatus } from "../../../types/requests";
+import { notificationAlert } from "../../ui/NotificationAlert";
 
 interface ITrackToPlaylistModalProps {
   selectedTrackIds: string[];
@@ -23,18 +27,43 @@ interface ITrackToPlaylistModalProps {
 
 const TrackToPlaylistModal = ({ selectedTrackIds }: ITrackToPlaylistModalProps) => {
   const dispatch = useDispatch();
-  const { playlistSelectorModal, personalPlaylists, status } = useSelector(
+  const { playlistSelectorModal, personalPlaylists, status, error } = useSelector(
     (state: RootState) => state.playlistSlice
   );
   const userId = useSelector((state: RootState) => state.authentication.user?.userId);
   const { classes } = useStyles({ disableHover: true });
   const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([]);
+  const [wasActionFired, setWasActionFired] = useState(false);
 
   useEffect(() => {
     if (status === RequestStatus.IDLE) {
       dispatch(getPersonalPlaylists());
     }
   }, [dispatch, status]);
+
+  useEffect(() => {
+    if (!wasActionFired) return;
+
+    if (status === RequestStatus.SUCCESS) {
+      notificationAlert({
+        title: "Track(s) added",
+        message: "Track(s) were successfully added to your playlist(s).",
+        iconColor: "green",
+        closeAfter: 5000
+      });
+      setWasActionFired(false);
+    }
+
+    if (status === RequestStatus.ERROR) {
+      notificationAlert({
+        title: "Failed to add track(s)",
+        message: error || "Something went wrong. Please try again.",
+        iconColor: "red",
+        closeAfter: 5000
+      });
+      setWasActionFired(false);
+    }
+  }, [status, error, wasActionFired]);
 
   const toggleSelection = (id: string) => {
     setSelectedPlaylists((prev) =>
@@ -55,6 +84,7 @@ const TrackToPlaylistModal = ({ selectedTrackIds }: ITrackToPlaylistModalProps) 
         trackUris
       })
     );
+    setWasActionFired(true);
     handleClose();
   };
 

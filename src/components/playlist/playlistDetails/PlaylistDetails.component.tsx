@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Group,
   Image,
@@ -8,7 +7,8 @@ import {
   Text,
   Title,
   Checkbox,
-  Button
+  Button,
+  useMantineColorScheme
 } from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
@@ -23,10 +23,16 @@ import TrackTableRow from "../../tracks/TrackTableRow.component";
 
 const PlaylistDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const { status: trackStatus } = useSelector((state: RootState) => state.spotifyTracks);
+  const { colorScheme } = useMantineColorScheme();
+  const {
+    personalPlaylists,
+    status: playlistStatus,
+    error
+  } = useSelector((state: RootState) => state.playlistSlice);
+
   const dispatch = useDispatch();
 
-  const { personalPlaylists } = useSelector((state: RootState) => state.playlistSlice);
-  const { status } = useSelector((state: RootState) => state.spotifyTracks);
   const user = useSelector((state: RootState) => state.authentication.user);
 
   const playlist = personalPlaylists.find((p) => p.id === id);
@@ -34,11 +40,13 @@ const PlaylistDetails = () => {
   const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
   const [searchSelection, setSearchSelection] = useState<string[]>([]);
 
+  const [wasActionFired, setWasActionFired] = useState(false);
+
   useEffect(() => {
-    if (!playlist && id && status !== RequestStatus.PENDING) {
+    if (!playlist && id && trackStatus !== RequestStatus.PENDING) {
       dispatch(getSinglePlaylist(id));
     }
-  }, [dispatch, id, playlist, status]);
+  }, [dispatch, id, playlist, trackStatus]);
 
   const toggleTrack = (trackId: string) => {
     setSelectedTracks((prev) =>
@@ -55,31 +63,40 @@ const PlaylistDetails = () => {
     }
   };
 
-  const handleAddTracks = async () => {
+  const handleAddTracks = () => {
     if (!id || searchSelection.length === 0) return;
 
     const uris = searchSelection.map((trackId) => `spotify:track:${trackId}`);
 
-    try {
-      dispatch(addTracksToPlaylists({ playlistIds: [id], trackUris: uris }));
-      dispatch(getSinglePlaylist(id));
-      setSearchSelection([]);
+    dispatch(addTracksToPlaylists({ playlistIds: [id], trackUris: uris }));
+    dispatch(getSinglePlaylist(id));
+    setWasActionFired(true);
+    setSearchSelection([]);
+  };
 
+  useEffect(() => {
+    if (!wasActionFired) return;
+
+    if (playlistStatus === RequestStatus.SUCCESS) {
       notificationAlert({
         title: "Track(s) added",
         message: "Track(s) were successfully added to your playlist.",
         iconColor: "green",
         closeAfter: 5000
       });
-    } catch (error: any) {
+      setWasActionFired(false);
+    }
+
+    if (playlistStatus === RequestStatus.ERROR) {
       notificationAlert({
         title: "Failed to add track(s)",
-        message: error.message || "Something went wrong. Please try again.",
+        message: error || "Something went wrong. Please try again.",
         iconColor: "red",
         closeAfter: 5000
       });
+      setWasActionFired(false);
     }
-  };
+  }, [playlistStatus, error, wasActionFired]);
 
   if (!playlist) return <Text px="xl">Playlist not found.</Text>;
 
@@ -92,7 +109,10 @@ const PlaylistDetails = () => {
           display: "flex",
           gap: 24,
           padding: "2rem",
-          background: "linear-gradient(135deg, #7c55de, #3b1898)"
+          background:
+            colorScheme === "light"
+              ? "linear-gradient(135deg,rgb(137, 217, 242),rgb(55, 135, 165))"
+              : "linear-gradient(135deg, #7c55de, #3b1898)"
         }}
       >
         <Image
@@ -105,10 +125,10 @@ const PlaylistDetails = () => {
           <Title order={1} size={48} fw={900} c="white">
             {playlist.name}
           </Title>
-          <Text size="sm" c="gray.4" mt="xs">
+          <Text size="sm" c={colorScheme === "dark" ? "gray.4" : "white"} mt="xs">
             {playlist.description}
           </Text>
-          <Text size="sm" c="gray.4" mt="sm">
+          <Text size="sm" c={colorScheme === "dark" ? "gray.4" : "white"} mt="sm">
             {playlist.owner.display_name} &#x2022; {playlist.tracks.length} tracks
           </Text>
         </Box>
@@ -122,7 +142,11 @@ const PlaylistDetails = () => {
               setSearchSelection={setSearchSelection}
               playlistTrackIds={playlist.tracks.map((t) => t.id)}
             />
-            <Button onClick={handleAddTracks} loading={status === RequestStatus.PENDING} size="sm">
+            <Button
+              onClick={handleAddTracks}
+              loading={trackStatus === RequestStatus.PENDING}
+              size="sm"
+            >
               Add
             </Button>
           </Group>
@@ -137,15 +161,18 @@ const PlaylistDetails = () => {
           <Table verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th w={40}>
-                  <Checkbox
-                    checked={selectedTracks.length === playlist.tracks.length}
-                    indeterminate={
-                      selectedTracks.length > 0 && selectedTracks.length !== playlist.tracks.length
-                    }
-                    onChange={toggleAll}
-                  />
-                </Table.Th>
+                {canEdit && (
+                  <Table.Th w={40}>
+                    <Checkbox
+                      checked={selectedTracks.length === playlist.tracks.length}
+                      indeterminate={
+                        selectedTracks.length > 0 &&
+                        selectedTracks.length !== playlist.tracks.length
+                      }
+                      onChange={toggleAll}
+                    />
+                  </Table.Th>
+                )}
                 <Table.Th>#</Table.Th>
                 <Table.Th>Track</Table.Th>
                 <Table.Th>Album</Table.Th>
@@ -160,6 +187,7 @@ const PlaylistDetails = () => {
                   index={index}
                   isSelected={selectedTracks.includes(track.id)}
                   onToggle={toggleTrack}
+                  showCheckbox={canEdit}
                 />
               ))}
             </Table.Tbody>
