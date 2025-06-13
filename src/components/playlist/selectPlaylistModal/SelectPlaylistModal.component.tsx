@@ -19,54 +19,30 @@ import { RootState } from "../../../store/store";
 import { useEffect, useState } from "react";
 import { useStyles } from "../playlistGridView/PlaylistGridView.styles";
 import { RequestStatus } from "../../../types/requests";
-import { notificationAlert } from "../../ui/NotificationAlert";
 import { useMediaQuery } from "@mantine/hooks";
+import { useNavigate } from "react-router";
 
 interface ISelectPlaylistModal {
   selectedTrackIds: string[];
 }
 
 const SelectPlaylistModal = ({ selectedTrackIds }: ISelectPlaylistModal) => {
-  const { playlistSelectorModal, personalPlaylists, status, error } = useSelector(
+  const { playlistSelectorModal, personalPlaylists, status } = useSelector(
     (state: RootState) => state.playlistSlice
   );
   const { classes } = useStyles({ disableHover: true });
   const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([]);
-  const [wasActionFired, setWasActionFired] = useState(false);
 
   const dispatch = useDispatch();
   const userId = useSelector((state: RootState) => state.authentication.user?.userId);
   const matches = useMediaQuery("(min-width: 56.25em)");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (status === RequestStatus.IDLE) {
+    if (personalPlaylists.length <= 0 && status === RequestStatus.IDLE) {
       dispatch(getPersonalPlaylists());
     }
-  }, [dispatch, status]);
-
-  useEffect(() => {
-    if (!wasActionFired) return;
-
-    if (status === RequestStatus.SUCCESS) {
-      notificationAlert({
-        title: "Track(s) added",
-        message: "Track(s) were successfully added to your playlist(s).",
-        iconColor: "green",
-        closeAfter: 5000
-      });
-      setWasActionFired(false);
-    }
-
-    if (status === RequestStatus.ERROR) {
-      notificationAlert({
-        title: "Failed to add track(s)",
-        message: error || "Something went wrong. Please try again.",
-        iconColor: "red",
-        closeAfter: 5000
-      });
-      setWasActionFired(false);
-    }
-  }, [status, error, wasActionFired]);
+  }, [dispatch, status, personalPlaylists.length]);
 
   const toggleSelection = (id: string) => {
     setSelectedPlaylists((prev) =>
@@ -77,6 +53,7 @@ const SelectPlaylistModal = ({ selectedTrackIds }: ISelectPlaylistModal) => {
   const handleClose = () => {
     dispatch(closePlaylistSelectModal());
     setSelectedPlaylists([]);
+    navigate("/");
   };
 
   const handleAdd = () => {
@@ -87,7 +64,7 @@ const SelectPlaylistModal = ({ selectedTrackIds }: ISelectPlaylistModal) => {
         trackUris
       })
     );
-    setWasActionFired(true);
+
     handleClose();
   };
 
