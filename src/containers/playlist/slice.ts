@@ -5,6 +5,7 @@ import { ErrorPayload, RequestStatus } from "../../types/requests";
 export interface IUserPlaylist {
   id: string;
   name: string;
+
   description?: string;
   tracks: ITrack[];
 }
@@ -73,6 +74,12 @@ export const removeTracksFromPlaylistSuccess = createAction(
 export const removeTracksFromPlaylistError = createAction<ErrorPayload>(
   "spotify/removeTracksFromPlaylistError"
 );
+export const updatePlaylist = createAction<{
+  id: string;
+  data: { name?: string; description?: string };
+}>("spotify/updatePlaylist");
+export const updatePlaylistSuccess = createAction("spotify/updatePlaylistSuccess");
+export const updatePlaylistError = createAction<ErrorPayload>("spotify/updatePlaylistError");
 
 const playlistSlice = createSlice({
   name: "userPlaylists",
@@ -169,6 +176,16 @@ const playlistSlice = createSlice({
       .addCase(removeTracksFromPlaylist, (state) => {
         state.status = RequestStatus.PENDING;
         state.error = undefined;
+      })
+      .addCase(updatePlaylist, (state) => {
+        state.status = RequestStatus.PENDING;
+      })
+      .addCase(updatePlaylistSuccess, (state) => {
+        state.status = RequestStatus.SUCCESS;
+      })
+      .addCase(updatePlaylistError, (state, action) => {
+        state.status = RequestStatus.ERROR;
+        state.error = action.payload.message;
       });
   }
 });

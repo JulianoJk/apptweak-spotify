@@ -1,4 +1,4 @@
-import { call, put, select, takeLatest, all } from "redux-saga/effects";
+import { call, put, select, takeLatest, all, delay } from "redux-saga/effects";
 import axios from "axios";
 import { SagaIterator } from "redux-saga";
 import { selectAccessToken } from "../auth/selectors";
@@ -15,7 +15,10 @@ import {
   IPersonalPlaylist,
   removeTracksFromPlaylist,
   removeTracksFromPlaylistError,
-  removeTracksFromPlaylistSuccess
+  removeTracksFromPlaylistSuccess,
+  updatePlaylist,
+  updatePlaylistError,
+  updatePlaylistSuccess
 } from "../playlist/slice";
 import { ITrack } from "../tracks/slice";
 import { PayloadAction } from "@reduxjs/toolkit";
@@ -86,8 +89,7 @@ function* createSpotifyPlaylistWorker(
         `https://api.spotify.com/v1/users/${user.id}/playlists`,
         {
           name: action.payload.name,
-          description: action.payload.description,
-          public: false
+          description: action.payload.description
         },
         {
           headers: {
@@ -173,10 +175,41 @@ function* removeTracksFromPlaylistWorker(
   }
 }
 
+function* updatePlaylistWorker(
+  action: PayloadAction<{
+    id: string;
+    data: { name?: string; description?: string };
+  }>
+): SagaIterator {
+  try {
+    const token: string = yield select(selectAccessToken);
+    const { id, data } = action.payload;
+
+    yield call(() =>
+      axios.put(`https://api.spotify.com/v1/playlists/${id}`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      })
+    );
+
+    yield put(updatePlaylistSuccess());
+
+    // Delay 30 sec, to allow Spotify to save the changes
+    yield delay(30000);
+    yield put(getSinglePlaylist(id));
+  } catch (error: any) {
+    console.error("Error updating playlist details:", error.message);
+    yield put(updatePlaylistError({ message: error.message }));
+  }
+}
+
 export default function* playlistSaga() {
   yield takeLatest(getPersonalPlaylists.type, fetchPersonalWorker);
   yield takeLatest(createSpotifyPlaylist.type, createSpotifyPlaylistWorker);
   yield takeLatest(getSinglePlaylist.type, fetchSinglePlaylistWorker);
   yield takeLatest(addTracksToPlaylists.type, addTracksToPlaylistsWorker);
   yield takeLatest(removeTracksFromPlaylist.type, removeTracksFromPlaylistWorker);
+  yield takeLatest(updatePlaylist.type, updatePlaylistWorker);
 }

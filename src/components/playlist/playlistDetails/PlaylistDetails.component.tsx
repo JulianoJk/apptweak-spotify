@@ -11,44 +11,54 @@ import {
   ScrollArea,
   useMantineColorScheme,
   UnstyledButton,
-  Center
+  Center,
+  Modal,
+  TextInput,
+  Textarea
 } from "@mantine/core";
-import { IconChevronDown, IconChevronUp, IconSelector } from "@tabler/icons-react";
+import { useMediaQuery } from "@mantine/hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
+import { IconChevronDown, IconChevronUp, IconPencil, IconSelector } from "@tabler/icons-react";
+
 import { RootState } from "../../../store/store";
-import { getSinglePlaylist, removeTracksFromPlaylist } from "../../../containers/playlist/slice";
-import { RequestStatus } from "../../../types/requests";
+import {
+  getSinglePlaylist,
+  removeTracksFromPlaylist,
+  updatePlaylist
+} from "../../../containers/playlist/slice";
 import { addTracksToPlaylists } from "../../../containers/tracks/slice";
+import { RequestStatus } from "../../../types/requests";
 import TrackSearchSelect from "./TrackSearchSelect.component";
-import { notificationAlert } from "../../ui/NotificationAlert";
 import TrackTableRow from "../../tracks/TrackTableRow.component";
-import { useMediaQuery } from "@mantine/hooks";
+import { notificationAlert } from "../../ui/NotificationAlert";
 
 const PlaylistDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch();
   const { colorScheme } = useMantineColorScheme();
+  const isDesktop = useMediaQuery("(min-width: 56.25em)");
+
   const {
     personalPlaylists,
     status: playlistStatus,
     error
   } = useSelector((state: RootState) => state.playlistSlice);
   const { status: trackStatus } = useSelector((state: RootState) => state.spotifyTracks);
-
-  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.authentication.user);
-  const playlist = personalPlaylists.find((p) => p.id === id);
-  const isDesktop = useMediaQuery("(min-width: 56.25em)");
 
-  const [selectedTracks, setSelectedTracks] = useState<string[]>([]);
+  const playlist = personalPlaylists.find((p) => p.id === id);
+  const canEdit = user?.userId === playlist?.owner.id || playlist?.collaborative;
+  const [selected, setSelected] = useState<string[]>([]);
   const [searchSelection, setSearchSelection] = useState<string[]>([]);
-  const [wasActionFired, setWasActionFired] = useState(false);
-  const [wasRemoveFired, setWasRemoveFired] = useState(false);
-  const [sortBy, setSortBy] = useState<"name" | "artist" | "album" | "albumReleaseDate" | null>(
-    null
-  );
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [actionFired, setActionFired] = useState(false);
+  const [removeFired, setRemoveFired] = useState(false);
+  const [sortBy, setSortBy] = useState<"name" | "album" | "albumReleaseDate" | null>(null);
+  const [reverseSort, setReverseSort] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   useEffect(() => {
     if (!playlist && id && trackStatus !== RequestStatus.PENDING) {
@@ -56,93 +66,105 @@ const PlaylistDetails = () => {
     }
   }, [dispatch, id, playlist, trackStatus]);
 
-  const toggleTrack = (trackId: string, index: number) => {
-    const trackKey = `${trackId}-${index}`;
-    setSelectedTracks((prev) =>
-      prev.includes(trackKey) ? prev.filter((key) => key !== trackKey) : [...prev, trackKey]
-    );
-  };
-
-  const toggleAll = () => {
-    if (!playlist) return;
-    const allKeys = sortedTracks.map((t, i) => `${t.id}-${i}`);
-    setSelectedTracks((prev) => (prev.length === allKeys.length ? [] : allKeys));
-  };
-
-  const handleAddTracks = () => {
-    if (!id || searchSelection.length === 0) return;
-    const uris = searchSelection.map((trackId) => `spotify:track:${trackId}`);
-    dispatch(addTracksToPlaylists({ playlistIds: [id], trackUris: uris }));
-    setWasActionFired(true);
-    setSearchSelection([]);
-  };
-
-  const handleRemoveTracks = () => {
-    if (!id || selectedTracks.length === 0) return;
-    const uris = selectedTracks.map((key) => `spotify:track:${key.split("-")[0]}`);
-    dispatch(removeTracksFromPlaylist({ playlistId: id, trackUris: uris }));
-    setWasRemoveFired(true);
-    setSelectedTracks([]);
-  };
+  useEffect(() => {
+    if (playlist) {
+      setEditName(playlist.name);
+      setEditDescription(playlist.description || "");
+    }
+  }, [playlist]);
 
   useEffect(() => {
-    if (wasActionFired && playlistStatus === RequestStatus.SUCCESS) {
+    if ((actionFired || removeFired) && playlistStatus === RequestStatus.SUCCESS) {
       notificationAlert({
-        title: "Track(s) added",
-        message: "Track(s) were successfully added to your playlist.",
+        title: removeFired ? "Track(s) removed" : "Track(s) added",
+        message: "Track(s) were successfully updated.",
         iconColor: "green",
         closeAfter: 5000
       });
-      setWasActionFired(false);
-    }
-
-    if (wasRemoveFired && playlistStatus === RequestStatus.SUCCESS) {
-      notificationAlert({
-        title: "Track(s) removed",
-        message: "Track(s) were successfully removed from your playlist.",
-        iconColor: "green",
-        closeAfter: 5000
-      });
-      setWasRemoveFired(false);
-    }
-
-    if ((wasActionFired || wasRemoveFired) && playlistStatus === RequestStatus.ERROR) {
+      setActionFired(false);
+      setRemoveFired(false);
+    } else if ((actionFired || removeFired) && playlistStatus === RequestStatus.ERROR) {
       notificationAlert({
         title: "Failed to update playlist",
         message: error || "Something went wrong. Please try again.",
         iconColor: "red",
         closeAfter: 5000
       });
-      setWasActionFired(false);
-      setWasRemoveFired(false);
+      setActionFired(false);
+      setRemoveFired(false);
     }
-  }, [playlistStatus, error, wasActionFired, wasRemoveFired]);
+  }, [playlistStatus, actionFired, removeFired, error]);
 
   if (!playlist) return <Text px={isDesktop ? "xl" : "md"}>Playlist not found.</Text>;
 
-  const canEdit = user?.userId === playlist.owner.id || playlist.collaborative === true;
+  const getTrackKey = (id: string, index: number) => `${id}-${index}`;
+  const sortedTracks = sortBy
+    ? [...playlist.tracks].sort((a, b) =>
+        reverseSort ? b[sortBy].localeCompare(a[sortBy]) : a[sortBy].localeCompare(b[sortBy])
+      )
+    : playlist.tracks;
 
-  const sortTracks = (tracks: typeof playlist.tracks) => {
-    if (!sortBy) return tracks;
-    return [...tracks].sort((a, b) => {
-      const aField = a[sortBy].toLowerCase();
-      const bField = b[sortBy].toLowerCase();
-      return reverseSortDirection ? bField.localeCompare(aField) : aField.localeCompare(bField);
-    });
+  const toggleTrack = (id: string, index: number) => {
+    const key = getTrackKey(id, index);
+    setSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   };
 
-  const sortedTracks = sortTracks(playlist.tracks);
+  const toggleAll = () => {
+    const all = sortedTracks.map((t, i) => getTrackKey(t.id, i));
+    setSelected((prev) => (prev.length === all.length ? [] : all));
+  };
 
   const setSorting = (field: typeof sortBy) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
+    const reversed = field === sortBy ? !reverseSort : false;
     setSortBy(field);
-    setSelectedTracks([]);
+    setReverseSort(reversed);
+    setSelected([]);
+  };
+
+  const handleAddTracks = () => {
+    if (!id || !searchSelection.length) return;
+    dispatch(
+      addTracksToPlaylists({
+        playlistIds: [id],
+        trackUris: searchSelection.map((t) => `spotify:track:${t}`)
+      })
+    );
+    setActionFired(true);
+    setSearchSelection([]);
+  };
+
+  const handleRemoveTracks = () => {
+    if (!id || !selected.length) return;
+    dispatch(
+      removeTracksFromPlaylist({
+        playlistId: id,
+        trackUris: selected.map((key) => `spotify:track:${key.split("-")[0]}`)
+      })
+    );
+    setRemoveFired(true);
+    setSelected([]);
+  };
+
+  const handleSaveEdit = () => {
+    if (!id || !editName.trim()) return;
+    dispatch(
+      updatePlaylist({
+        id,
+        data: { name: editName.trim(), description: editDescription.trim() }
+      })
+    );
+    notificationAlert({
+      title: "Playlist update submitted",
+      message: "Changes may take a few seconds to appear due to Spotify caching.",
+      iconColor: "blue",
+      closeAfter: 5000
+    });
+    setEditOpen(false);
   };
 
   const SortableTh = ({ label, field }: { label: string; field: typeof sortBy }) => {
-    const isSorted = sortBy === field;
-    const Icon = isSorted ? (reverseSortDirection ? IconChevronUp : IconChevronDown) : IconSelector;
+    const active = sortBy === field;
+    const Icon = active ? (reverseSort ? IconChevronUp : IconChevronDown) : IconSelector;
 
     return (
       <Table.Th>
@@ -167,7 +189,6 @@ const PlaylistDetails = () => {
           display: isDesktop ? "flex" : undefined,
           gap: 24,
           padding: isDesktop ? "2rem" : undefined,
-          marginBottom: isDesktop ? 0 : "lg",
           background: isDesktop
             ? colorScheme === "light"
               ? "linear-gradient(135deg,rgb(137, 217, 242),rgb(55, 135, 165))"
@@ -190,7 +211,6 @@ const PlaylistDetails = () => {
             size={isDesktop ? 48 : 28}
             fw={900}
             c={isDesktop ? "white" : undefined}
-            mt={isDesktop ? undefined : "md"}
           >
             {playlist.name}
           </Title>
@@ -205,6 +225,16 @@ const PlaylistDetails = () => {
             {playlist.owner.display_name} • {playlist.tracks.length} tracks
           </Text>
         </Box>
+        {canEdit && (
+          <Button
+            variant="subtle"
+            size="xs"
+            leftSection={<IconPencil size={16} />}
+            onClick={() => setEditOpen(true)}
+          >
+            Edit
+          </Button>
+        )}
       </Box>
 
       {canEdit && (
@@ -214,7 +244,7 @@ const PlaylistDetails = () => {
             setSearchSelection={setSearchSelection}
             playlistTrackIds={playlist.tracks.map((t) => t.id)}
           />
-          {searchSelection.length > 0 && (
+          {!!searchSelection.length && (
             <Button
               color="green"
               onClick={handleAddTracks}
@@ -224,18 +254,18 @@ const PlaylistDetails = () => {
               Add {searchSelection.length} Track(s)
             </Button>
           )}
-          {selectedTracks.length > 0 && (
+          {!!selected.length && (
             <Button variant="outline" color="red" onClick={handleRemoveTracks} size="sm">
-              Remove {selectedTracks.length} Track(s)
+              Remove {selected.length} Track(s)
             </Button>
           )}
         </Group>
       )}
 
-      {playlist.tracks.length <= 0 ? (
+      {!playlist.tracks.length ? (
         <Text c="dimmed" size={isDesktop ? "xl" : "md"} ta="center">
           No tracks available in this playlist.
-          {canEdit ? " You can add tracks using the search bar above." : ""}
+          {canEdit && " You can add tracks using the search bar above."}
         </Text>
       ) : (
         <ScrollArea>
@@ -245,31 +275,28 @@ const PlaylistDetails = () => {
                 {canEdit && (
                   <Table.Th w={40}>
                     <Checkbox
-                      checked={selectedTracks.length === sortedTracks.length}
-                      indeterminate={
-                        selectedTracks.length > 0 && selectedTracks.length !== sortedTracks.length
-                      }
+                      checked={selected.length === sortedTracks.length}
+                      indeterminate={!!selected.length && selected.length !== sortedTracks.length}
                       onChange={toggleAll}
                     />
                   </Table.Th>
                 )}
                 <Table.Th>#</Table.Th>
                 <SortableTh label="Track" field="name" />
-                <SortableTh label="Artist" field="artist" />
                 <SortableTh label="Album" field="album" />
                 <SortableTh label="Release Date" field="albumReleaseDate" />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {sortedTracks.map((track, index) => {
-                const key = `${track.id}-${index}`;
+              {sortedTracks.map((track, i) => {
+                const key = getTrackKey(track.id, i);
                 return (
                   <TrackTableRow
                     key={key}
                     track={track}
-                    index={index}
-                    isSelected={selectedTracks.includes(key)}
-                    onToggle={() => toggleTrack(track.id, index)}
+                    index={i}
+                    isSelected={selected.includes(key)}
+                    onToggle={() => toggleTrack(track.id, i)}
                     showCheckbox={canEdit}
                   />
                 );
@@ -278,6 +305,29 @@ const PlaylistDetails = () => {
           </Table>
         </ScrollArea>
       )}
+
+      <Modal opened={editOpen} onClose={() => setEditOpen(false)} title="Edit Playlist" centered>
+        <TextInput
+          label="Playlist Name"
+          value={editName}
+          onChange={(e) => setEditName(e.currentTarget.value)}
+          required
+          mb="sm"
+        />
+        <Textarea
+          label="Description"
+          value={editDescription}
+          onChange={(e) => setEditDescription(e.currentTarget.value)}
+          autosize
+          minRows={3}
+        />
+        <Group justify="flex-end" mt="md">
+          <Button variant="default" onClick={() => setEditOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit}>Save</Button>
+        </Group>
+      </Modal>
     </Box>
   );
 };
