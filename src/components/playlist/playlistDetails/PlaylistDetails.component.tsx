@@ -9,8 +9,11 @@ import {
   Checkbox,
   Button,
   ScrollArea,
-  useMantineColorScheme
+  useMantineColorScheme,
+  UnstyledButton,
+  Center
 } from "@mantine/core";
+import { IconChevronDown, IconChevronUp, IconSelector } from "@tabler/icons-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
@@ -42,6 +45,10 @@ const PlaylistDetails = () => {
   const [searchSelection, setSearchSelection] = useState<string[]>([]);
   const [wasActionFired, setWasActionFired] = useState(false);
   const [wasRemoveFired, setWasRemoveFired] = useState(false);
+  const [sortBy, setSortBy] = useState<"name" | "artist" | "album" | "albumReleaseDate" | null>(
+    null
+  );
+  const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
   useEffect(() => {
     if (!playlist && id && trackStatus !== RequestStatus.PENDING) {
@@ -58,7 +65,7 @@ const PlaylistDetails = () => {
 
   const toggleAll = () => {
     if (!playlist) return;
-    const allKeys = playlist.tracks.map((t, i) => `${t.id}-${i}`);
+    const allKeys = sortedTracks.map((t, i) => `${t.id}-${i}`);
     setSelectedTracks((prev) => (prev.length === allKeys.length ? [] : allKeys));
   };
 
@@ -114,6 +121,44 @@ const PlaylistDetails = () => {
   if (!playlist) return <Text px={isDesktop ? "xl" : "md"}>Playlist not found.</Text>;
 
   const canEdit = user?.userId === playlist.owner.id || playlist.collaborative === true;
+
+  const sortTracks = (tracks: typeof playlist.tracks) => {
+    if (!sortBy) return tracks;
+    return [...tracks].sort((a, b) => {
+      const aField = a[sortBy].toLowerCase();
+      const bField = b[sortBy].toLowerCase();
+      return reverseSortDirection ? bField.localeCompare(aField) : aField.localeCompare(bField);
+    });
+  };
+
+  const sortedTracks = sortTracks(playlist.tracks);
+
+  const setSorting = (field: typeof sortBy) => {
+    const reversed = field === sortBy ? !reverseSortDirection : false;
+    setReverseSortDirection(reversed);
+    setSortBy(field);
+    setSelectedTracks([]);
+  };
+
+  const SortableTh = ({ label, field }: { label: string; field: typeof sortBy }) => {
+    const isSorted = sortBy === field;
+    const Icon = isSorted ? (reverseSortDirection ? IconChevronUp : IconChevronDown) : IconSelector;
+
+    return (
+      <Table.Th>
+        <UnstyledButton onClick={() => setSorting(field)}>
+          <Group justify="space-between">
+            <Text fw={500} fz="sm">
+              {label}
+            </Text>
+            <Center>
+              <Icon size={16} stroke={1.5} />
+            </Center>
+          </Group>
+        </UnstyledButton>
+      </Table.Th>
+    );
+  };
 
   return (
     <Box px={isDesktop ? "xl" : "md"} py={isDesktop ? "xl" : "md"}>
@@ -200,32 +245,35 @@ const PlaylistDetails = () => {
                 {canEdit && (
                   <Table.Th w={40}>
                     <Checkbox
-                      checked={selectedTracks.length === playlist.tracks.length}
+                      checked={selectedTracks.length === sortedTracks.length}
                       indeterminate={
-                        selectedTracks.length > 0 &&
-                        selectedTracks.length !== playlist.tracks.length
+                        selectedTracks.length > 0 && selectedTracks.length !== sortedTracks.length
                       }
                       onChange={toggleAll}
                     />
                   </Table.Th>
                 )}
                 <Table.Th>#</Table.Th>
-                <Table.Th>Track</Table.Th>
-                <Table.Th>Album</Table.Th>
-                <Table.Th>Release Date</Table.Th>
+                <SortableTh label="Track" field="name" />
+                <SortableTh label="Artist" field="artist" />
+                <SortableTh label="Album" field="album" />
+                <SortableTh label="Release Date" field="albumReleaseDate" />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {playlist.tracks.map((track, index) => (
-                <TrackTableRow
-                  key={`${track.id}-${index}`}
-                  track={track}
-                  index={index}
-                  isSelected={selectedTracks.includes(`${track.id}-${index}`)}
-                  onToggle={() => toggleTrack(track.id, index)}
-                  showCheckbox={canEdit}
-                />
-              ))}
+              {sortedTracks.map((track, index) => {
+                const key = `${track.id}-${index}`;
+                return (
+                  <TrackTableRow
+                    key={key}
+                    track={track}
+                    index={index}
+                    isSelected={selectedTracks.includes(key)}
+                    onToggle={() => toggleTrack(track.id, index)}
+                    showCheckbox={canEdit}
+                  />
+                );
+              })}
             </Table.Tbody>
           </Table>
         </ScrollArea>
