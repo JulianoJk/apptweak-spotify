@@ -53,7 +53,6 @@ const SelectPlaylistModal = ({ selectedTrackIds }: ISelectPlaylistModal) => {
   const handleClose = () => {
     dispatch(closePlaylistSelectModal());
     setSelectedPlaylists([]);
-    navigate("/");
   };
 
   const handleAdd = () => {
@@ -64,8 +63,8 @@ const SelectPlaylistModal = ({ selectedTrackIds }: ISelectPlaylistModal) => {
         trackUris
       })
     );
-
     handleClose();
+    navigate("/");
   };
 
   const editablePlaylists = personalPlaylists.filter(

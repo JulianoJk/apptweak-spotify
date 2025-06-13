@@ -227,7 +227,8 @@ const PlaylistDetails = () => {
         </Box>
         {canEdit && (
           <Button
-            variant="subtle"
+            variant="filled"
+            color="black"
             size="xs"
             leftSection={<IconPencil size={16} />}
             onClick={() => setEditOpen(true)}
