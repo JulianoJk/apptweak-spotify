@@ -1,4 +1,4 @@
-import { Box, Card, Image, SimpleGrid, Text } from "@mantine/core";
+import { Box, Button, Card, Image, SimpleGrid, Text } from "@mantine/core";
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
@@ -6,9 +6,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import LoadingIndicator from "../../ui/LoadingIndicator.component";
 import ErrorMessage from "../../ui/ErrorMessage.component";
-import { getPersonalPlaylists, IPersonalPlaylist } from "../../../containers/playlist/slice";
+import {
+  getPersonalPlaylists,
+  IPersonalPlaylist,
+  openCreateModal
+} from "../../../containers/playlist/slice";
 import { RequestStatus } from "../../../types/requests";
 import { useStyles } from "./PlaylistGridView.styles";
+import { IconLibraryPlus } from "@tabler/icons-react";
 
 const PlaylistGridMobile = () => {
   const { classes, cx } = useStyles({ disableHover: true });
@@ -28,11 +33,35 @@ const PlaylistGridMobile = () => {
   const handleCardClick = (id: string) => {
     navigate(`/playlist/${id}`);
   };
-
+  const createPlaylist = () => {
+    dispatch(openCreateModal());
+  };
   if (status === RequestStatus.PENDING) return <LoadingIndicator />;
   if (status === RequestStatus.ERROR)
     return <ErrorMessage message={error || "Something went wrong"} />;
-
+  if (personalPlaylists.length === 0)
+    return (
+      <Box
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh"
+        }}
+      >
+        <Text c="dimmed" size="md" mb="md" ta="center">
+          You have no playlists yet. Create one to get started!
+        </Text>
+        <Button
+          variant="default"
+          onClick={createPlaylist}
+          rightSection={<IconLibraryPlus size={16} />}
+        >
+          Create new playlist
+        </Button>
+      </Box>
+    );
   return (
     <Box px="md" py="md" hiddenFrom="sm">
       <Text className={classes.title} size="lg" mb="md">

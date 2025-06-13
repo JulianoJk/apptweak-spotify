@@ -7,10 +7,11 @@ import { MantineEmotionProvider, emotionTransform } from "@mantine/emotion";
 import { selectUser } from "./containers/auth/selectors";
 import Header from "./components/header/Header.component";
 import { Route, Routes, BrowserRouter as Router } from "react-router";
-import PlaylistList from "./components/playlist/playlistList/PlaylistList.component";
+
 import TrackList from "./components/tracks/TrackList.component";
 import PlaylistDetails from "./components/playlist/playlistDetails/PlaylistDetails.component";
 import { Notifications } from "@mantine/notifications";
+import ResponsivePlaylistGrid from "./components/playlist/playlistGridView/ResponsivePlaylistGrid.component";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
@@ -29,8 +30,7 @@ const App: FC = (): ReactElement => {
             </AppShell.Header>
             <AppShell.Main style={{ marginTop: "6rem" }}>
               <Routes>
-                <Route path="/" element={<PlaylistList />} />
-                <Route path="/playlists" element={<PlaylistList />} />
+                <Route path="/" element={<ResponsivePlaylistGrid />} />
                 <Route path="/playlist/:id" element={<PlaylistDetails />} />
                 <Route path="/search/tracks/:query" element={<TrackList />} />
                 <Route path="/*" element={<h1>test route</h1>} />
