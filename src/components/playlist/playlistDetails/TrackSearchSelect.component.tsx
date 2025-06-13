@@ -56,7 +56,7 @@ const TrackSearchSelect = ({
     <MultiSelect
       sx={{ maxWidth: "30em" }}
       label="Add tracks to playlist"
-      placeholder="Search for tracks"
+      placeholder="Add tracks"
       searchable
       data={[
         ...visibleOptions,

@@ -54,9 +54,7 @@ const PlaylistDetails = () => {
   const [searchSelection, setSearchSelection] = useState<string[]>([]);
   const [actionFired, setActionFired] = useState(false);
   const [removeFired, setRemoveFired] = useState(false);
-  const [sortBy, setSortBy] = useState<"name" | "artist" | "album" | "albumReleaseDate" | null>(
-    null
-  );
+  const [sortBy, setSortBy] = useState<"name" | "album" | "albumReleaseDate" | null>(null);
   const [reverseSort, setReverseSort] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState("");
@@ -285,7 +283,6 @@ const PlaylistDetails = () => {
                 )}
                 <Table.Th>#</Table.Th>
                 <SortableTh label="Track" field="name" />
-                <SortableTh label="Artist" field="artist" />
                 <SortableTh label="Album" field="album" />
                 <SortableTh label="Release Date" field="albumReleaseDate" />
               </Table.Tr>
