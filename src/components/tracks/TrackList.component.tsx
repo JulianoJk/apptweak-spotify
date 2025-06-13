@@ -77,6 +77,7 @@ const TrackList = () => {
           {tracks.map((track, index) => (
             <TrackTableRow
               key={track.id}
+              showCheckbox={true}
               track={track}
               index={index}
               isSelected={selectedTracks.includes(track.id)}
