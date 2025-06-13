@@ -8,6 +8,7 @@ import App from "./App";
 import AuthProvider from "./containers/auth";
 import reportWebVitals from "./reportWebVitals";
 import { store } from "./store/store";
+import "@mantine/notifications/styles.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
