@@ -21,7 +21,7 @@ import TrackSearchSelect from "./TrackSearchSelect.component";
 import { notificationAlert } from "../../ui/NotificationAlert";
 import TrackTableRow from "../../tracks/TrackTableRow.component";
 
-const PlaylistDetails = () => {
+const PlaylistDetailsDesktop = () => {
   const { id } = useParams<{ id: string }>();
   const { status: trackStatus } = useSelector((state: RootState) => state.spotifyTracks);
   const { colorScheme } = useMantineColorScheme();
@@ -159,22 +159,27 @@ const PlaylistDetails = () => {
               setSearchSelection={setSearchSelection}
               playlistTrackIds={playlist.tracks.map((t) => t.id)}
             />
-            <Button
-              onClick={handleAddTracks}
-              loading={trackStatus === RequestStatus.PENDING}
-              size="sm"
-            >
-              Add
-            </Button>
-            <Button
-              variant="outline"
-              color="red"
-              disabled={selectedTracks.length === 0}
-              onClick={handleRemoveTracks}
-              size="sm"
-            >
-              Remove
-            </Button>
+            {searchSelection.length > 0 && (
+              <Button
+                color="green"
+                onClick={handleAddTracks}
+                loading={trackStatus === RequestStatus.PENDING}
+                size="sm"
+              >
+                Add {searchSelection.length} Track(s)
+              </Button>
+            )}
+            {selectedTracks.length > 0 && (
+              <Button
+                variant="outline"
+                color="red"
+                disabled={selectedTracks.length === 0}
+                onClick={handleRemoveTracks}
+                size="sm"
+              >
+                Remove {selectedTracks.length} Track(s)
+              </Button>
+            )}
           </Group>
         )}
 
@@ -224,4 +229,4 @@ const PlaylistDetails = () => {
   );
 };
 
-export default PlaylistDetails;
+export default PlaylistDetailsDesktop;

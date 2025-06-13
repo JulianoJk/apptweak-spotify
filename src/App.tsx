@@ -9,9 +9,9 @@ import Header from "./components/header/Header.component";
 import { Route, Routes, BrowserRouter as Router } from "react-router";
 
 import TrackList from "./components/tracks/TrackList.component";
-import PlaylistDetails from "./components/playlist/playlistDetails/PlaylistDetails.component";
 import { Notifications } from "@mantine/notifications";
-import ResponsivePlaylistGrid from "./components/playlist/playlistGridView/ResponsivePlaylistGrid.component";
+import ResponsivePlaylistGrid from "./components/playlist/playlistGridView/ResponsivePlaylistGrid";
+import ResponsivePlaylistDetails from "./components/playlist/playlistDetails/ResponsivePlaylistDetails";
 
 const App: FC = (): ReactElement => {
   const user = useSelector(selectUser);
@@ -31,7 +31,7 @@ const App: FC = (): ReactElement => {
             <AppShell.Main style={{ marginTop: "6rem" }}>
               <Routes>
                 <Route path="/" element={<ResponsivePlaylistGrid />} />
-                <Route path="/playlist/:id" element={<PlaylistDetails />} />
+                <Route path="/playlist/:id" element={<ResponsivePlaylistDetails />} />
                 <Route path="/search/tracks/:query" element={<TrackList />} />
                 <Route path="/*" element={<h1>test route</h1>} />
               </Routes>

@@ -82,6 +82,7 @@ export default function Header() {
             />
             {matches && (
               <Button
+                variant="filled"
                 onClick={searchTracks}
                 disabled={!searchValue.trim()}
                 size="xs"
